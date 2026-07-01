@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Mapping Blueprint V2</title>
+    <style>
+        :root {
+            --bg-dark: #070810;
+            --bg-card: #0f1019;
+            --bg-card-hover: #161825;
+            --accent-perso: #3b82f6;
+            --accent-client: #d4af37;
+            --accent-green: #22c55e;
+            --accent-orange: #ff6b35;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --border: rgba(255,255,255,0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* MODE SELECTOR */
+        .mode-selector {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            background: var(--bg-dark);
+        }
+        .mode-selector.hidden { display: none; }
+        .mode-cards {
+            display: flex;
+            gap: 2rem;
+            padding: 2rem;
+        }
+        .mode-card {
+            width: 320px;
+            padding: 2.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+        }
+        .mode-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-perso);
+            box-shadow: 0 20px 60px rgba(59,130,246,0.2);
+        }
+        .mode-card.client:hover {
+            border-color: var(--accent-client);
+            box-shadow: 0 20px 60px rgba(212,175,55,0.2);
+        }
+        .mode-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .mode-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .mode-card.perso .mode-title { color: var(--accent-perso); }
+        .mode-card.client .mode-title { color: var(--accent-client); }
+        .mode-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* HEADER */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(7,8,16,0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 100;
+        }
+        .logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .logo-accent { color: var(--accent-perso); }
+        .logo-accent.client { color: var(--accent-client); }
+        .slide-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .btn-mode {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .btn-mode:hover {
+            border-color: var(--accent-perso);
+            color: var(--text-primary);
+        }
+
+        /* PROGRESS BAR */
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            z-index: 100;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-perso);
+            transition: width 0.4s ease;
+        }
+        .progress-fill.client { background: var(--accent-client); }
+
+        /* SLIDES CONTAINER */
+        .slides-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 60px;
+            overflow: hidden;
+        }
+        .slide {
+            position: absolute;
+            inset: 0;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(100px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+        .slide.prev {
+            transform: translateX(-100px);
+        }
+
+        /* NAVIGATION */
+        .nav-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+        .nav-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-btn:hover:not(:disabled) {
+            background: var(--accent-perso);
+            border-color: var(--accent-perso);
+        }
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* SLIDE CONTENT */
+        .slide-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .slide-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(59,130,246,0.15);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-perso);
+            margin-bottom: 1rem;
+        }
+        .slide-badge.client {
+            background: rgba(212,175,55,0.15);
+            border-color: rgba(212,175,55,0.3);
+            color: var(--accent-client);
+        }
+        .slide-title {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff, var(--accent-perso));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .slide-title.client {
+            background: linear-gradient(135deg, #fff, var(--accent-client));
+            -webkit-background-clip: text;
+        }
+        .slide-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* CARDS */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+        .card:hover {
+            border-color: var(--accent-perso);
+            transform: translateY(-4px);
+        }
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--accent-perso);
+        }
+        .card-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* FORM ELEMENTS */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-perso);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* CHECKLIST */
+        .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .checklist-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+        .checklist-item:last-child { border-bottom: none; }
+        .checklist-item input {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-green);
+            cursor: pointer;
+        }
+        .checklist-item span {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .checklist-item.done span {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        /* CALCULATOR */
+        .calculator {
+            background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.05));
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            margin: 1.5rem auto;
+        }
+        .calc-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-perso);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .calc-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .calc-label {
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .calc-input {
+            width: 120px;
+            padding: 0.75rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: right;
+        }
+        .calc-result {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            text-align: center;
+        }
+        .calc-result-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .calc-result-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* TABLE */
+        .data-table {
+            width: 100%;
+            max-width: 900px;
+            margin: 1.5rem auto;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table th {
+            background: var(--bg-dark);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+        .data-table td {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .data-table input {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-primary);
+            padding: 0.5rem;
+            width: 100%;
+            border-radius: 6px;
+        }
+        .data-table input:focus {
+            outline: none;
+            border-color: var(--accent-perso);
+            background: var(--bg-dark);
+        }
+
+        /* CONCEPT BOX */
+        .concept-box {
+            background: linear-gradient(135deg, rgba(59,130,246,0.1), transparent);
+            border-left: 3px solid var(--accent-perso);
+            border-radius: 0 12px 12px 0;
+            padding: 1.5rem;
+            margin: 1.5rem auto;
+            max-width: 700px;
+        }
+        .concept-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-perso);
+            margin-bottom: 0.75rem;
+        }
+        .concept-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .mode-cards { flex-direction: column; }
+            .slide { padding: 1.5rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .header { padding: 0 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- MODE SELECTOR -->
+    <div class="mode-selector" id="modeSelector">
+        <div class="mode-cards">
+            <div class="mode-card perso" onclick="startMode('perso')">
+                <div class="mode-icon">🎯</div>
+                <div class="mode-title">Mode Personnel</div>
+                <div class="mode-desc">Identifie et automatise tes propres taches. Parfait pour commencer et pratiquer le framework sur toi-meme.</div>
+            </div>
+            <div class="mode-card client" onclick="startMode('client')">
+                <div class="mode-icon">💼</div>
+                <div class="mode-title">Mode Client</div>
+                <div class="mode-desc">Accompagne un client dans le mapping de ses opportunites d'automatisation. Framework complet pour facturer.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header" id="header" style="display: none;">
+        <div class="logo">
+            <span>Automation Blueprint</span>
+            <span class="logo-accent" id="logoAccent">PERSO</span>
+        </div>
+        <div class="slide-counter" id="slideCounter">01 / 13</div>
+        <button class="btn-mode" onclick="switchMode()">Changer de mode</button>
+    </header>
+
+    <!-- SLIDES CONTAINER -->
+    <div class="slides-container" id="slidesContainer" style="display: none;"></div>
+
+    <!-- NAVIGATION -->
+    <div class="nav-controls" id="navControls" style="display: none;">
+        <button class="nav-btn" id="prevBtn" onclick="prevSlide()">←</button>
+        <button class="nav-btn" id="nextBtn" onclick="nextSlide()">→</button>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div class="progress-bar" id="progressBar" style="display: none;">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <script>
+        // STATE
+        let currentMode = null;
+        let currentSlide = 0;
+        let projectData = {};
+
+        // SLIDES DATA
+        const slidesPerso = [
+            {
+                badge: "Introduction",
+                title: "Bienvenue dans ton Audit Personnel",
+                subtitle: "En 13 etapes, tu vas identifier tes meilleures opportunites d'automatisation",
+                content: `
+                    <div class="cards-grid">
+                        <div class="card">
+                            <div class="card-title">🔍 Phase 1: Personal Leverage</div>
+                            <div class="card-text">Identifie ou tu perds du temps et calcule le ROI potentiel de chaque automatisation.</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">📐 Phase 2: Mapping</div>
+                            <div class="card-text">Transforme tes opportunites en workflows clairs et implementables.</div>
+                        </div>
+                    </div>
+                    <div class="concept-box">
+                        <div class="concept-title">💡 Pourquoi commencer par soi?</div>
+                        <div class="concept-text">Tu ne peux pas vendre ce que tu n'as pas pratique. En automatisant TES taches d'abord, tu developpes l'expertise et les case studies pour convaincre tes clients.</div>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 1 - Etape 1",
+                title: "The Time Lens",
+                subtitle: "Identifie ou tu perds vraiment ton temps",
+                content: `
+                    <div class="concept-box">
+                        <div class="concept-title">⚠️ Random Automation Fails</div>
+                        <div class="concept-text">La plupart automatisent au hasard — ce qui les ennuie ce jour-la ou ce qu'ils ont vu sur YouTube. Resultat: des heures a construire quelque chose qui economise 10 MINUTES.</div>
+                    </div>
+                    <div class="cards-grid">
+                        <div class="card">
+                            <div class="card-title">🔄 Repetitif</div>
+                            <div class="card-text">Meme tache repetee sans variation (ex: email de bienvenue a chaque lead)</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">⏱️ Chronophage</div>
+                            <div class="card-text">Impacte le temps total investi — considere l'effet cumule</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">❌ Error-Prone</div>
+                            <div class="card-text">Taches manuelles sujettes aux erreurs de fatigue</div>
+                        </div>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">✓ Actions a completer</div>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Tracker ton temps pendant 3-5 jours (TOUTES les taches)</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Identifier les taches repetitives</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Noter la frequence (quotidien, hebdo, mensuel)</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Estimer le temps passe sur chaque tache</span></label>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 1 - Etape 2",
+                title: "Personal Audit",
+                subtitle: "Liste et categorise TOUTES tes taches recurrentes",
+                content: `
+                    <table class="data-table" id="auditTable">
+                        <thead>
+                            <tr>
+                                <th>Tache</th>
+                                <th>Categorie</th>
+                                <th>Freq.</th>
+                                <th>Temps</th>
+                                <th>Digital?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><input placeholder="Ex: Repondre emails clients"></td><td><input placeholder="Admin"></td><td><input placeholder="Daily"></td><td><input placeholder="30min"></td><td><input type="checkbox"></td></tr>
+                            <tr><td><input placeholder="Ex: Mise a jour CRM"></td><td><input placeholder="Data"></td><td><input placeholder="Daily"></td><td><input placeholder="20min"></td><td><input type="checkbox"></td></tr>
+                            <tr><td><input placeholder="Ex: Facturation"></td><td><input placeholder="Finance"></td><td><input placeholder="Weekly"></td><td><input placeholder="2h"></td><td><input type="checkbox"></td></tr>
+                            <tr><td><input></td><td><input></td><td><input></td><td><input></td><td><input type="checkbox"></td></tr>
+                            <tr><td><input></td><td><input></td><td><input></td><td><input></td><td><input type="checkbox"></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="checklist">
+                        <div class="checklist-title">✓ Objectif minimum</div>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Lister au moins 20 taches recurrentes</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Categoriser chaque tache</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Marquer les taches digitales (automatisables)</span></label>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 1 - Etape 3",
+                title: "The Income Lens",
+                subtitle: "Calcule le ROI potentiel de chaque automatisation",
+                content: `
+                    <div class="calculator">
+                        <div class="calc-title">💰 Calculateur ROI Annuel</div>
+                        <div class="calc-row">
+                            <span class="calc-label">Temps economise par semaine (heures)</span>
+                            <input type="number" class="calc-input" id="timeSaved" value="2" oninput="calculateROI()">
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Ton taux horaire (EUR)</span>
+                            <input type="number" class="calc-input" id="hourlyRate" value="50" oninput="calculateROI()">
+                        </div>
+                        <div class="calc-result">
+                            <div class="calc-result-value" id="roiResult">5,200 €</div>
+                            <div class="calc-result-label">Valeur annuelle creee</div>
+                        </div>
+                    </div>
+                    <div class="concept-box">
+                        <div class="concept-title">📊 Formule</div>
+                        <div class="concept-text"><strong>ROI Annuel = Temps economise/semaine × Taux horaire × 52 semaines</strong><br><br>Exemple: 2h × 50€ × 52 = 5,200€/an de valeur creee</div>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">✓ Actions</div>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Calculer ton taux horaire effectif</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Estimer le temps economise pour chaque tache</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Identifier les "quick wins" (haut ROI, faible effort)</span></label>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 1 - Etape 4",
+                title: "Step-by-Step Test",
+                subtitle: "Filtre de delegation: cette tache est-elle automatisable?",
+                content: `
+                    <div class="concept-box">
+                        <div class="concept-title">🎯 Regle d'Or</div>
+                        <div class="concept-text">"Si tu ne peux pas documenter le processus etape par etape, tu ne peux pas l'automatiser. La clarte precede l'automatisation."</div>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">🧪 Test de Delegation (pour chaque tache)</div>
+                        <label class="checklist-item"><input type="checkbox"><span>La tache a-t-elle des etapes claires et repetables?</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>L'input est-il previsible/structure?</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>L'output est-il defini et mesurable?</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Necessite-t-elle un jugement humain complexe? (si oui = difficile)</span></label>
+                    </div>
+                    <div class="concept-box" style="border-color: var(--accent-orange);">
+                        <div class="concept-title" style="color: var(--accent-orange);">📝 Template Documentation</div>
+                        <div class="concept-text">
+                            <strong>1. Trigger:</strong> Comment la tache demarre?<br>
+                            <strong>2. Etapes:</strong> 1, 2, 3... (numerotees)<br>
+                            <strong>3. Input:</strong> Donnees d'entree<br>
+                            <strong>4. Output:</strong> Resultat attendu<br>
+                            <strong>5. Edge cases:</strong> Cas particuliers
+                        </div>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 1 - Etape 5",
+                title: "ICE Scoring",
+                subtitle: "Priorise tes opportunites avec le framework ICE",
+                content: `
+                    <div class="cards-grid">
+                        <div class="card">
+                            <div class="card-title">I - Impact (1-10)</div>
+                            <div class="card-text">Combien de temps/argent economise? Impacte-t-il ta croissance?</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">C - Confidence (1-10)</div>
+                            <div class="card-text">Certitude que ca marchera? As-tu deja automatise quelque chose de similaire?</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">E - Ease (1-10)</div>
+                            <div class="card-text">Facilite d'implementation? Necessite des outils complexes?</div>
+                        </div>
+                    </div>
+                    <div class="calculator">
+                        <div class="calc-title">🎯 Calculateur ICE</div>
+                        <div class="calc-row">
+                            <span class="calc-label">Impact (1-10)</span>
+                            <input type="number" class="calc-input" id="iceI" value="8" min="1" max="10" oninput="calculateICE()">
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Confidence (1-10)</span>
+                            <input type="number" class="calc-input" id="iceC" value="7" min="1" max="10" oninput="calculateICE()">
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Ease (1-10)</span>
+                            <input type="number" class="calc-input" id="iceE" value="6" min="1" max="10" oninput="calculateICE()">
+                        </div>
+                        <div class="calc-result">
+                            <div class="calc-result-value" id="iceResult">7.0</div>
+                            <div class="calc-result-label">Score ICE - HIGH VALUE</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 2 - Etape 1",
+                title: "Process Mapping",
+                subtitle: "Les 4 elements de tout workflow",
+                content: `
+                    <div class="cards-grid">
+                        <div class="card">
+                            <div class="card-title">⚡ Trigger</div>
+                            <div class="card-text">Ce qui demarre le processus (webhook, schedule, email, form)</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">🔧 Actions</div>
+                            <div class="card-text">Les etapes executees (fetch, transform, send, store)</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">🔀 Conditions</div>
+                            <div class="card-text">Les decisions/branchements (if X then Y, else Z)</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">📤 Output</div>
+                            <div class="card-text">Le resultat final (email envoye, data stockee)</div>
+                        </div>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">✓ Actions</div>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Choisir l'opportunite #1 de ton Opportunity Map</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Documenter le processus actuel "as-is"</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Identifier le trigger de demarrage</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Lister toutes les etapes dans l'ordre</span></label>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 2 - Etape 2",
+                title: "Workflow Triggers",
+                subtitle: "Identifie comment demarre ton automatisation",
+                content: `
+                    <div class="cards-grid">
+                        <div class="card"><div class="card-title">🕐 Schedule</div><div class="card-text">A heure fixe (daily 9h, weekly Monday, monthly)</div></div>
+                        <div class="card"><div class="card-title">🔗 Webhook</div><div class="card-text">Evenement externe (Stripe payment, API call)</div></div>
+                        <div class="card"><div class="card-title">📝 Form Submit</div><div class="card-text">Formulaire rempli (contact, lead magnet)</div></div>
+                        <div class="card"><div class="card-title">📧 Email</div><div class="card-text">Reception d'un email specifique</div></div>
+                        <div class="card"><div class="card-title">🗄️ Database</div><div class="card-text">Nouvelle entree ou modification</div></div>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">✓ Actions</div>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Identifier le trigger exact de ton workflow</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Definir la frequence (si schedule)</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Lister les donnees disponibles au trigger</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Verifier disponibilite dans Make/n8n</span></label>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 2 - Etape 3",
+                title: "Data Transformation",
+                subtitle: "Framework SDIT: Source → Destination",
+                content: `
+                    <div class="cards-grid">
+                        <div class="card"><div class="card-title">📥 Source</div><div class="card-text">D'ou viennent les donnees?</div></div>
+                        <div class="card"><div class="card-title">📋 Data Format</div><div class="card-text">JSON, CSV, XML, API response?</div></div>
+                        <div class="card"><div class="card-title">🔄 Transform</div><div class="card-text">Mapping, filtering, enriching?</div></div>
+                        <div class="card"><div class="card-title">📤 Destination</div><div class="card-text">Ou envoyer? (CRM, DB, Email)</div></div>
+                    </div>
+                    <div class="concept-box">
+                        <div class="concept-title">🔄 Pipeline Type</div>
+                        <div class="concept-text">Input → Parse → Map → Validate → Enrich → Output<br><br><em>Ex: Webhook JSON → Extract fields → Map to Airtable → Validate emails → Enrich avec lookup → Create record</em></div>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 2 - Etape 4",
+                title: "Integrating AI",
+                subtitle: "Ou l'IA peut-elle ajouter de la valeur?",
+                content: `
+                    <div class="cards-grid">
+                        <div class="card"><div class="card-title">✍️ Generation</div><div class="card-text">Ecrire emails, rapports, reponses personnalisees</div></div>
+                        <div class="card"><div class="card-title">🏷️ Classification</div><div class="card-text">Trier, categoriser, router automatiquement</div></div>
+                        <div class="card"><div class="card-title">📄 Extraction</div><div class="card-text">Parser documents, emails, images, PDFs</div></div>
+                        <div class="card"><div class="card-title">📝 Summarization</div><div class="card-text">Resumer contenu long en points cles</div></div>
+                        <div class="card"><div class="card-title">🤔 Decision</div><div class="card-text">Evaluer et choisir le prochain step</div></div>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">✓ Actions</div>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Identifier les etapes ou l'IA ajouterait de la valeur</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Choisir le modele (GPT-4, Claude, etc.)</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Rediger le prompt initial</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Definir le format de sortie (JSON structure)</span></label>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 2 - Etape 5",
+                title: "Wireframing",
+                subtitle: "Dessine ton blueprint avant de construire",
+                content: `
+                    <div class="concept-box">
+                        <div class="concept-title">🧱 Approche Modulaire</div>
+                        <div class="concept-text">
+                            <strong>Modularity:</strong> Cree des "Lego blocks" reutilisables<br>
+                            <strong>Scalability:</strong> Ajuste sans tout reconstruire<br>
+                            <strong>Clarity:</strong> Simple a comprendre pour tous
+                        </div>
+                    </div>
+                    <div class="concept-box" style="background: var(--bg-card); border-color: var(--accent-green);">
+                        <div class="concept-title" style="color: var(--accent-green);">📐 Structure Wireframe</div>
+                        <div class="concept-text" style="font-family: monospace; font-size: 0.85rem;">
+TRIGGER<br>
+&nbsp;&nbsp;&nbsp;↓<br>
+ACTION 1 (fetch/parse)<br>
+&nbsp;&nbsp;&nbsp;↓<br>
+CONDITION? ─Yes→ ACTION 2<br>
+&nbsp;&nbsp;&nbsp;↓ No<br>
+ACTION 3 (transform)<br>
+&nbsp;&nbsp;&nbsp;↓<br>
+OUTPUT (send/store)
+                        </div>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">✓ Etapes du Wireframe</div>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Ouvrir Excalidraw ou Miro</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Dessiner le flux principal</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Ajouter les sous-taches dans chaque bloc</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Connecter avec des fleches</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Valider avant implementation</span></label>
+                    </div>
+                `
+            },
+            {
+                badge: "Phase 2 - Etape 6",
+                title: "Context Engineering",
+                subtitle: "Donne a ton agent AI le bon contexte",
+                content: `
+                    <div class="cards-grid">
+                        <div class="card"><div class="card-title">🧠 Working Memory</div><div class="card-text">Pendant l'execution — input data, runtime variables</div></div>
+                        <div class="card"><div class="card-title">💬 Short-Term Memory</div><div class="card-text">Conversation recente — context window</div></div>
+                        <div class="card"><div class="card-title">📚 Long-Term Memory</div><div class="card-text">Persistant — Vector DB, CRM, Google Docs</div></div>
+                    </div>
+                    <div class="concept-box" style="border-color: var(--accent-orange);">
+                        <div class="concept-title" style="color: var(--accent-orange);">🎯 5 Principes Context Engineering</div>
+                        <div class="concept-text">
+                            1. <strong>Commencer par la fin</strong> — definir les queries a gerer<br>
+                            2. <strong>Pipeline de donnees propre</strong> — data quality is key<br>
+                            3. <strong>Accuracy = qualite agent</strong> — garbage in, garbage out<br>
+                            4. <strong>Optimiser context window</strong> — moins = moins cher<br>
+                            5. <strong>Specialiser les agents</strong> — 1 tache = 1 agent
+                        </div>
+                    </div>
+                `
+            },
+            {
+                badge: "Recap",
+                title: "Felicitations! 🎉",
+                subtitle: "Tu as complete ton audit personnel",
+                content: `
+                    <div class="concept-box" style="border-color: var(--accent-green);">
+                        <div class="concept-title" style="color: var(--accent-green);">✅ Tu sais maintenant</div>
+                        <div class="concept-text">
+                            1. Identifier des opportunites a fort ROI<br>
+                            2. Scorer et prioriser avec ICE<br>
+                            3. Mapper des workflows clairs<br>
+                            4. Integrer l'AI intelligemment<br>
+                            5. Documenter tes process
+                        </div>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">🚀 Prochaines etapes</div>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Implementer ta premiere automatisation</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Documenter comme case study</span></label>
+                        <label class="checklist-item"><input type="checkbox" onchange="saveProgress()"><span>Passer au Mode Client pour facturer!</span></label>
+                    </div>
+                `
+            }
+        ];
+
+        const slidesClient = [
+            {
+                badge: "Mode Client",
+                title: "Discovery & Opportunity Mapping",
+                subtitle: "Framework complet pour accompagner un client",
+                content: `
+                    <div class="cards-grid">
+                        <div class="card" style="border-color: var(--accent-client);">
+                            <div class="card-title" style="color: var(--accent-client);">🔍 Discovery</div>
+                            <div class="card-text">Questionnaire et audit des processus existants</div>
+                        </div>
+                        <div class="card" style="border-color: var(--accent-client);">
+                            <div class="card-title" style="color: var(--accent-client);">💰 Value Assessment</div>
+                            <div class="card-text">Calcul ROI et priorisation Business ICE</div>
+                        </div>
+                        <div class="card" style="border-color: var(--accent-client);">
+                            <div class="card-title" style="color: var(--accent-client);">📐 Live Mapping</div>
+                            <div class="card-text">Wireframing en direct avec le client</div>
+                        </div>
+                        <div class="card" style="border-color: var(--accent-client);">
+                            <div class="card-title" style="color: var(--accent-client);">💵 Pricing</div>
+                            <div class="card-text">Strategies pour facturer l'Opportunity Map</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                badge: "Client - Etape 1",
+                title: "Client Discovery Form",
+                subtitle: "Collecte les informations cles sur le business",
+                content: `
+                    <div style="max-width: 600px; margin: 0 auto;">
+                        <div class="form-group">
+                            <label class="form-label">Nom du client / Entreprise</label>
+                            <input class="form-input" placeholder="Ex: OPTIMI Group">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Secteur d'activite</label>
+                            <input class="form-input" placeholder="Ex: Location courte duree, E-commerce...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Taille de l'equipe</label>
+                            <input class="form-input" placeholder="Ex: 5 personnes">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Principal pain point exprime</label>
+                            <input class="form-input" placeholder="Ex: Trop de temps passe sur les emails">
+                        </div>
+                    </div>
+                `
+            },
+            {
+                badge: "Client - Etape 2",
+                title: "Time Lens Questions",
+                subtitle: "Questions strategiques a poser au client",
+                content: `
+                    <div class="checklist">
+                        <div class="checklist-title">❓ Questions a poser</div>
+                        <label class="checklist-item"><input type="checkbox"><span>Quelles taches prennent le plus de temps a votre equipe?</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Combien de personnes font des taches similaires?</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Quels processus ralentissent votre croissance?</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Ou perdez-vous du temps en attente d'infos?</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Quels handoffs manuels causent des delais?</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Ou les erreurs manuelles sont les plus frequentes?</span></label>
+                    </div>
+                    <div class="concept-box" style="border-color: var(--accent-client);">
+                        <div class="concept-title" style="color: var(--accent-client);">💡 Astuce</div>
+                        <div class="concept-text">Ecoute attentivement et note les MOTS du client. Utilise-les dans ta proposition pour montrer que tu comprends leur probleme.</div>
+                    </div>
+                `
+            },
+            {
+                badge: "Client - Etape 3",
+                title: "Income Lens - Growth Opportunities",
+                subtitle: "Identifie les automatisations qui generent du revenue",
+                content: `
+                    <div class="cards-grid">
+                        <div class="card" style="border-color: var(--accent-client);"><div class="card-title" style="color: var(--accent-client);">🎯 Lead Gen</div><div class="card-text">Automatiser la prospection, enrichment de leads</div></div>
+                        <div class="card" style="border-color: var(--accent-client);"><div class="card-title" style="color: var(--accent-client);">💼 Sales</div><div class="card-text">Follow-ups automatiques, lead scoring</div></div>
+                        <div class="card" style="border-color: var(--accent-client);"><div class="card-title" style="color: var(--accent-client);">🚀 Onboarding</div><div class="card-text">Experience client scalable</div></div>
+                        <div class="card" style="border-color: var(--accent-client);"><div class="card-title" style="color: var(--accent-client);">🔄 Retention</div><div class="card-text">Re-engagement automatique, upsell</div></div>
+                    </div>
+                    <div class="calculator" style="background: linear-gradient(135deg, rgba(212,175,55,0.1), transparent); border-color: rgba(212,175,55,0.3);">
+                        <div class="calc-title" style="color: var(--accent-client);">💰 Revenue Impact Calculator</div>
+                        <div class="calc-row"><span class="calc-label">Leads/mois supplementaires</span><input type="number" class="calc-input" value="50"></div>
+                        <div class="calc-row"><span class="calc-label">Valeur moyenne client (EUR)</span><input type="number" class="calc-input" value="2000"></div>
+                        <div class="calc-row"><span class="calc-label">Taux de conversion (%)</span><input type="number" class="calc-input" value="10"></div>
+                        <div class="calc-result">
+                            <div class="calc-result-value" style="color: var(--accent-client);">120,000 €</div>
+                            <div class="calc-result-label">Revenue annuel supplementaire</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                badge: "Client - Etape 4",
+                title: "SOP Audit",
+                subtitle: "Verifier la documentation existante",
+                content: `
+                    <div class="concept-box" style="border-color: var(--accent-orange);">
+                        <div class="concept-title" style="color: var(--accent-orange);">💰 Opportunite Cachee</div>
+                        <div class="concept-text">Si le client n'a PAS de SOPs documentes, c'est une opportunite de facturer leur creation! Service additionnel: 500-2000 EUR par processus.</div>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">🔍 Audit SOP</div>
+                        <label class="checklist-item"><input type="checkbox"><span>Demander les SOPs existants au client</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Evaluer leur qualite et completude</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Identifier les gaps de documentation</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Proposer creation de SOPs si necessaire</span></label>
+                    </div>
+                `
+            },
+            {
+                badge: "Client - Etape 5",
+                title: "Business ICE Scoring",
+                subtitle: "Priorisation avec ponderation client",
+                content: `
+                    <div class="calculator" style="background: linear-gradient(135deg, rgba(212,175,55,0.1), transparent); border-color: rgba(212,175,55,0.3);">
+                        <div class="calc-title" style="color: var(--accent-client);">🎯 Business ICE (Pondéré)</div>
+                        <div class="calc-row"><span class="calc-label">Impact (×0.4)</span><input type="number" class="calc-input" value="8" min="1" max="10"></div>
+                        <div class="calc-row"><span class="calc-label">Confidence (×0.3)</span><input type="number" class="calc-input" value="7" min="1" max="10"></div>
+                        <div class="calc-row"><span class="calc-label">Ease (×0.2)</span><input type="number" class="calc-input" value="6" min="1" max="10"></div>
+                        <div class="calc-row"><span class="calc-label">Client Priority (×0.1)</span><input type="number" class="calc-input" value="9" min="1" max="10"></div>
+                        <div class="calc-result">
+                            <div class="calc-result-value" style="color: var(--accent-client);">7.4</div>
+                            <div class="calc-result-label">Score Business ICE</div>
+                        </div>
+                    </div>
+                    <div class="concept-box" style="border-color: var(--accent-client);">
+                        <div class="concept-title" style="color: var(--accent-client);">📊 Formule</div>
+                        <div class="concept-text">Score = (I×0.4) + (C×0.3) + (E×0.2) + (Priority×0.1)</div>
+                    </div>
+                `
+            },
+            {
+                badge: "Client - Etape 6",
+                title: "Live Blueprint Session",
+                subtitle: "Mapper en direct avec le client",
+                content: `
+                    <div class="checklist">
+                        <div class="checklist-title">🎬 Avant le call</div>
+                        <label class="checklist-item"><input type="checkbox"><span>Ouvrir Excalidraw ou Miro</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Preparer un canvas blanc</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Tester le screen share</span></label>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">🎥 Pendant le call</div>
+                        <label class="checklist-item"><input type="checkbox"><span>Partager ecran et dessiner en direct</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Poser: "Quand ce processus demarre?"</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Dessiner chaque etape avec le client</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Valider: "C'est bien ca?"</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Identifier les edge cases</span></label>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">✅ Apres le call</div>
+                        <label class="checklist-item"><input type="checkbox"><span>Exporter en PDF/PNG</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Envoyer au client sous 24h</span></label>
+                    </div>
+                `
+            },
+            {
+                badge: "Client - Etape 7",
+                title: "Pricing Strategy",
+                subtitle: "Comment facturer l'Opportunity Map?",
+                content: `
+                    <div class="cards-grid">
+                        <div class="card" style="border-color: var(--accent-green);"><div class="card-title" style="color: var(--accent-green);">🎁 Gratuit</div><div class="card-text">Lead magnet pour projets plus gros. Build trust d'abord.</div></div>
+                        <div class="card" style="border-color: var(--accent-client);"><div class="card-title" style="color: var(--accent-client);">💰 500-2000€</div><div class="card-text">Service standalone avec ROI clair. Valeur immediate.</div></div>
+                        <div class="card" style="border-color: var(--accent-perso);"><div class="card-title" style="color: var(--accent-perso);">🤝 Deductible</div><div class="card-text">Gratuit si signe, 1000€ sinon. Incentive a closer.</div></div>
+                    </div>
+                    <div class="concept-box" style="border-color: var(--accent-client);">
+                        <div class="concept-title" style="color: var(--accent-client);">📜 Script de Vente</div>
+                        <div class="concept-text">"L'Opportunity Map est normalement un engagement de 1500€. On passe 2-3h a analyser votre business, on mappe 3-5 opportunites d'automatisation avec des estimations ROI, et on vous presente une roadmap claire. Beaucoup de clients utilisent ca pour planifier leur budget automatisation de l'annee."</div>
+                    </div>
+                `
+            },
+            {
+                badge: "Recap Client",
+                title: "Tu es pret a facturer! 💰",
+                subtitle: "Tu as tous les outils pour accompagner un client",
+                content: `
+                    <div class="concept-box" style="border-color: var(--accent-client);">
+                        <div class="concept-title" style="color: var(--accent-client);">✅ Ton Kit Client</div>
+                        <div class="concept-text">
+                            ✓ Discovery Form<br>
+                            ✓ Questions Time & Income Lens<br>
+                            ✓ SOP Audit Checklist<br>
+                            ✓ Business ICE Calculator<br>
+                            ✓ Live Mapping Framework<br>
+                            ✓ Pricing Strategy
+                        </div>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-title">🚀 Prochaines etapes</div>
+                        <label class="checklist-item"><input type="checkbox"><span>Pitcher ton premier client</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Faire une session Discovery</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Delivrer ton premier Opportunity Map</span></label>
+                        <label class="checklist-item"><input type="checkbox"><span>Closer le projet d'implementation!</span></label>
+                    </div>
+                `
+            }
+        ];
+
+        // FUNCTIONS
+        function startMode(mode) {
+            currentMode = mode;
+            currentSlide = 0;
+            document.getElementById('modeSelector').classList.add('hidden');
+            document.getElementById('header').style.display = 'flex';
+            document.getElementById('slidesContainer').style.display = 'block';
+            document.getElementById('navControls').style.display = 'flex';
+            document.getElementById('progressBar').style.display = 'block';
+
+            const logoAccent = document.getElementById('logoAccent');
+            logoAccent.textContent = mode === 'perso' ? 'PERSO' : 'CLIENT';
+            logoAccent.className = 'logo-accent' + (mode === 'client' ? ' client' : '');
+
+            renderSlides();
+            updateUI();
+        }
+
+        function switchMode() {
+            document.getElementById('modeSelector').classList.remove('hidden');
+            document.getElementById('header').style.display = 'none';
+            document.getElementById('slidesContainer').style.display = 'none';
+            document.getElementById('navControls').style.display = 'none';
+            document.getElementById('progressBar').style.display = 'none';
+        }
+
+        function renderSlides() {
+            const container = document.getElementById('slidesContainer');
+            const slides = currentMode === 'perso' ? slidesPerso : slidesClient;
+            const accentClass = currentMode === 'client' ? ' client' : '';
+
+            container.innerHTML = slides.map((slide, i) => `
+                <div class="slide ${i === 0 ? 'active' : ''}" data-index="${i}">
+                    <div class="slide-header">
+                        <div class="slide-badge${accentClass}">${slide.badge}</div>
+                        <h1 class="slide-title${accentClass}">${slide.title}</h1>
+                        <p class="slide-subtitle">${slide.subtitle}</p>
+                    </div>
+                    <div class="slide-content">${slide.content}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateUI() {
+            const slides = currentMode === 'perso' ? slidesPerso : slidesClient;
+            const total = slides.length;
+
+            // Counter
+            document.getElementById('slideCounter').textContent =
+                String(currentSlide + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+
+            // Progress
+            const progress = ((currentSlide + 1) / total) * 100;
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = progress + '%';
+            progressFill.className = 'progress-fill' + (currentMode === 'client' ? ' client' : '');
+
+            // Nav buttons
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === total - 1;
+
+            // Slides
+            document.querySelectorAll('.slide').forEach((el, i) => {
+                el.classList.remove('active', 'prev');
+                if (i === currentSlide) el.classList.add('active');
+                if (i < currentSlide) el.classList.add('prev');
+            });
+        }
+
+        function nextSlide() {
+            const slides = currentMode === 'perso' ? slidesPerso : slidesClient;
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateUI();
+            }
+        }
+
+        function calculateROI() {
+            const time = parseFloat(document.getElementById('timeSaved')?.value) || 0;
+            const rate = parseFloat(document.getElementById('hourlyRate')?.value) || 0;
+            const roi = time * rate * 52;
+            const el = document.getElementById('roiResult');
+            if (el) el.textContent = roi.toLocaleString('fr-FR') + ' €';
+        }
+
+        function calculateICE() {
+            const i = parseFloat(document.getElementById('iceI')?.value) || 0;
+            const c = parseFloat(document.getElementById('iceC')?.value) || 0;
+            const e = parseFloat(document.getElementById('iceE')?.value) || 0;
+            const score = ((i + c + e) / 3).toFixed(1);
+            const el = document.getElementById('iceResult');
+            if (el) {
+                el.textContent = score;
+                const label = el.nextElementSibling;
+                if (label) {
+                    let level = 'LOW';
+                    if (score >= 8) level = 'TOP PRIORITY';
+                    else if (score >= 6) level = 'HIGH VALUE';
+                    else if (score >= 4) level = 'MEDIUM';
+                    label.textContent = 'Score ICE - ' + level;
+                }
+            }
+        }
+
+        function saveProgress() {
+            // Save to localStorage
+            const data = { mode: currentMode, slide: currentSlide };
+            localStorage.setItem('blueprintProgress', JSON.stringify(data));
+        }
+
+        // KEYBOARD NAV
+        document.addEventListener('keydown', (e) => {
+            if (!currentMode) return;
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // TOUCH NAV
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
+        document.addEventListener('touchend', e => {
+            if (!currentMode) return;
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) nextSlide();
+                else prevSlide();
+            }
+        });
+
+        // LOAD SAVED PROGRESS
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('blueprintProgress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.mode) {
+                    startMode(data.mode);
+                    currentSlide = data.slide || 0;
+                    updateUI();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

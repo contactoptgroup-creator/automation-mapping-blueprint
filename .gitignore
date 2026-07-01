@@ -2,6 +2,8 @@
 *.tmp
 *.temp
 ~$*
+tmpclaude-*
+C:*
 
 # Script temporaire
 extract_docx.ps1
@@ -15,3 +17,5 @@ desktop.ini
 # IDE
 .vscode/
 .idea/
+
+.vercel
