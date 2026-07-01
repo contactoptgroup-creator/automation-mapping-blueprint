@@ -1,0 +1,17 @@
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# Script temporaire
+extract_docx.ps1
+course_content.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
