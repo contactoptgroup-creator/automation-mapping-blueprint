@@ -302,8 +302,67 @@
                 </div>
             </section>
 
-            <!-- SLIDE 3: PERSONAL AUDIT -->
+            <!-- SLIDE 3: QUESTIONS DE DÉCOUVERTE -->
             <section class="slide" data-slide="3">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 1 - Préparation</div>
+                    <h1 class="slide-title">🔍 Questions de Découverte</h1>
+                    <p class="slide-subtitle">Réponds à ces questions pour identifier tes vraies opportunités d'automatisation</p>
+                </div>
+
+                <div class="alert alert-info">
+                    💡 <strong>Pourquoi ces questions?</strong> Elles t'aident à identifier les tâches les plus impactantes AVANT de les lister.
+                </div>
+
+                <div id="discoveryQuestions">
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom: 1rem;">🔴 Questions "Pain Points"</div>
+                        <div class="form-group">
+                            <label class="form-label">1. Quelles tâches te frustrent le plus au quotidien?</label>
+                            <textarea class="form-input" id="discovery_q1" placeholder="Ex: Répondre aux mêmes questions par email, copier-coller des données..." onchange="saveDiscovery()"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">2. Où perds-tu régulièrement du temps sans créer de valeur?</label>
+                            <textarea class="form-input" id="discovery_q2" placeholder="Ex: Rechercher des infos éparpillées, attendre des validations..." onchange="saveDiscovery()"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">3. Quelles erreurs se répètent malgré tes efforts?</label>
+                            <textarea class="form-input" id="discovery_q3" placeholder="Ex: Oublis de relances, fautes de frappe dans les emails..." onchange="saveDiscovery()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom: 1rem;">🟡 Questions "Opportunité"</div>
+                        <div class="form-group">
+                            <label class="form-label">4. Quelles tâches t'empêchent de faire un travail à plus haute valeur?</label>
+                            <textarea class="form-input" id="discovery_q4" placeholder="Ex: L'admin me prend 3h/jour, je ne peux pas développer de nouveaux clients..." onchange="saveDiscovery()"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">5. Si tu avais 10h de plus par semaine, que ferais-tu?</label>
+                            <textarea class="form-input" id="discovery_q5" placeholder="Ex: Prospection, création de contenu, formation..." onchange="saveDiscovery()"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">6. Quelle tâche aimerais-tu ne plus JAMAIS faire?</label>
+                            <textarea class="form-input" id="discovery_q6" placeholder="Ex: La saisie de factures, le suivi des paiements..." onchange="saveDiscovery()"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom: 1rem;">🟢 Questions "Faisabilité"</div>
+                        <div class="form-group">
+                            <label class="form-label">7. Quels processus impliquent de jongler entre plusieurs outils?</label>
+                            <textarea class="form-input" id="discovery_q7" placeholder="Ex: Copier de Gmail vers le CRM, puis vers Excel..." onchange="saveDiscovery()"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success" style="margin-top: 1.5rem;">
+                    ✅ <strong>Bien joué!</strong> Utilise ces réponses pour identifier tes automatisations prioritaires sur la page suivante.
+                </div>
+            </section>
+
+            <!-- SLIDE 4: PERSONAL AUDIT -->
+            <section class="slide" data-slide="4">
                 <div class="slide-header">
                     <div class="slide-badge">Phase 1 - Etape 1</div>
                     <h1 class="slide-title">Tes Automatisations</h1>
@@ -350,34 +409,140 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Temps/semaine (heures)</label>
-                            <input type="number" class="form-input" id="newAutomationTime" placeholder="2" min="0" step="0.5">
+
+                    <!-- TIME LENS DÉTAILLÉ -->
+                    <div class="card" style="background: var(--bg-input); margin: 1rem 0;">
+                        <div class="card-title" style="margin-bottom: 0.75rem; font-size: 0.9rem;">⏱️ Time Lens Détaillé</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Préparation (h/sem)</label>
+                                <input type="number" class="form-input" id="newAutomationTimePrep" placeholder="0.5" min="0" step="0.25">
+                                <div class="form-hint">Rassembler infos, ouvrir outils</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Exécution (h/sem)</label>
+                                <input type="number" class="form-input" id="newAutomationTimeExec" placeholder="1" min="0" step="0.25">
+                                <div class="form-hint">Faire la tâche elle-même</div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Vérification (h/sem)</label>
+                                <input type="number" class="form-input" id="newAutomationTimeCheck" placeholder="0.25" min="0" step="0.25">
+                                <div class="form-hint">Contrôler le résultat</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Correction (h/sem)</label>
+                                <input type="number" class="form-input" id="newAutomationTimeCorrect" placeholder="0.25" min="0" step="0.25">
+                                <div class="form-hint">Refaire si erreur</div>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Tache digitale?</label>
-                            <select class="form-input" id="newAutomationDigital">
-                                <option value="true">Oui</option>
-                                <option value="false">Non</option>
-                            </select>
+                            <label class="form-label">Temps TOTAL/semaine (calculé)</label>
+                            <input type="number" class="form-input" id="newAutomationTime" placeholder="2" min="0" step="0.5" style="background: var(--accent); color: white; font-weight: bold;">
                         </div>
                     </div>
+
+                    <!-- PAIN POINTS -->
+                    <div class="card" style="background: var(--bg-input); margin: 1rem 0; border-color: var(--accent-orange);">
+                        <div class="card-title" style="margin-bottom: 0.75rem; font-size: 0.9rem;">🔥 Pain Points (Score de Douleur)</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Frustration (1-5)</label>
+                                <select class="form-input" id="newAutomationPainFrustration">
+                                    <option value="1">1 - Minime</option>
+                                    <option value="2">2 - Légère</option>
+                                    <option value="3" selected>3 - Modérée</option>
+                                    <option value="4">4 - Forte</option>
+                                    <option value="5">5 - Extreme</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fréquence erreurs (1-5)</label>
+                                <select class="form-input" id="newAutomationPainErrors">
+                                    <option value="1">1 - Très rare</option>
+                                    <option value="2">2 - Rare</option>
+                                    <option value="3" selected>3 - Parfois</option>
+                                    <option value="4">4 - Souvent</option>
+                                    <option value="5">5 - Toujours</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Impact si mal fait (1-5)</label>
+                                <select class="form-input" id="newAutomationPainImpact">
+                                    <option value="1">1 - Négligeable</option>
+                                    <option value="2">2 - Mineur</option>
+                                    <option value="3" selected>3 - Modéré</option>
+                                    <option value="4">4 - Important</option>
+                                    <option value="5">5 - Critique</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tache digitale?</label>
+                                <select class="form-input" id="newAutomationDigital">
+                                    <option value="true">Oui</option>
+                                    <option value="false">Non</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="stat-card" style="margin-top: 0.5rem; padding: 0.75rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: var(--text-muted);">Pain Score:</span>
+                                <span id="painScorePreview" style="font-size: 1.5rem; font-weight: 700; color: var(--accent-orange);">9/15</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <button class="btn btn-primary" onclick="addAutomation()">Ajouter cette automatisation</button>
                 </div>
             </section>
 
-            <!-- SLIDE 4: INCOME LENS -->
-            <section class="slide" data-slide="4">
+            <!-- SLIDE 5: INCOME LENS + COÛTS CACHÉS -->
+            <section class="slide" data-slide="5">
                 <div class="slide-header">
                     <div class="slide-badge">Phase 1 - Etape 2</div>
-                    <h1 class="slide-title">Income Lens</h1>
-                    <p class="slide-subtitle">Calcule le ROI de chaque automatisation</p>
+                    <h1 class="slide-title">💰 Income Lens Enrichi</h1>
+                    <p class="slide-subtitle">ROI complet incluant les coûts cachés</p>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Ton taux horaire (EUR)</label>
-                    <input type="number" class="form-input" id="hourlyRate" value="50" min="0" style="max-width: 150px;" oninput="calculateAllROI()">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Ton taux horaire (EUR)</label>
+                        <input type="number" class="form-input" id="hourlyRate" value="50" min="0" style="max-width: 150px;" oninput="calculateAllROI()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Coût moyen d'une erreur (EUR)</label>
+                        <input type="number" class="form-input" id="errorCost" value="100" min="0" style="max-width: 150px;" oninput="calculateAllROI()">
+                    </div>
+                </div>
+
+                <!-- COÛTS CACHÉS -->
+                <div class="card" style="margin-bottom: 1rem; border-color: var(--accent-orange);">
+                    <div class="card-title" style="margin-bottom: 0.75rem;">💡 Comprendre les Coûts Cachés</div>
+                    <div class="card-content">
+                        <div class="form-row" style="font-size: 0.85rem;">
+                            <div>
+                                <strong style="color: var(--accent-orange);">⚠️ Coût des Erreurs</strong>
+                                <p style="color: var(--text-muted);">Temps de correction, perte de clients, stress</p>
+                            </div>
+                            <div>
+                                <strong style="color: var(--accent-orange);">🧠 Coût Mental</strong>
+                                <p style="color: var(--text-muted);">Fatigue, baisse de créativité, burnout</p>
+                            </div>
+                        </div>
+                        <div class="form-row" style="font-size: 0.85rem; margin-top: 0.75rem;">
+                            <div>
+                                <strong style="color: var(--accent-orange);">⏳ Coût d'Opportunité</strong>
+                                <p style="color: var(--text-muted);">Ce que tu NE fais PAS pendant ce temps</p>
+                            </div>
+                            <div>
+                                <strong style="color: var(--accent-orange);">🐌 Coût de Latence</strong>
+                                <p style="color: var(--text-muted);">Délais qui impactent l'expérience client</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="table-container">
@@ -387,16 +552,21 @@
                                 <th>#</th>
                                 <th>Automatisation</th>
                                 <th>Temps/sem</th>
-                                <th>ROI Annuel</th>
+                                <th>Pain</th>
+                                <th>ROI Temps</th>
+                                <th>+ Erreurs</th>
+                                <th>ROI TOTAL</th>
                             </tr>
                         </thead>
                         <tbody id="roiTableBody">
-                            <tr><td colspan="4" class="empty-state">Ajoute des automatisations en Page 3</td></tr>
+                            <tr><td colspan="7" class="empty-state">Ajoute des automatisations en Page 4</td></tr>
                         </tbody>
                         <tfoot id="roiTableFoot" style="display: none;">
                             <tr style="background: var(--bg-input);">
-                                <td colspan="2"><strong>TOTAL</strong></td>
+                                <td colspan="3"><strong>TOTAL</strong></td>
+                                <td id="totalPain">-</td>
                                 <td id="totalTime">0h</td>
+                                <td id="totalErrors">0€</td>
                                 <td id="totalROI" style="color: var(--accent-green); font-weight: 700;">0 €</td>
                             </tr>
                         </tfoot>
@@ -404,16 +574,38 @@
                 </div>
 
                 <div class="alert alert-success" id="roiAlert" style="display: none;">
-                    🎉 <strong>Formule:</strong> ROI Annuel = Temps/semaine × Taux horaire × 52 semaines
+                    🎉 <strong>Formule enrichie:</strong> ROI Total = (Temps × Taux × 52) + (Pain Score × Erreurs/mois × Coût/erreur × 12)
                 </div>
             </section>
 
-            <!-- SLIDE 5: DELEGATION TEST -->
-            <section class="slide" data-slide="5">
+            <!-- SLIDE 6: VALIDATION TECHNIQUE -->
+            <section class="slide" data-slide="6">
                 <div class="slide-header">
                     <div class="slide-badge">Phase 1 - Etape 3</div>
-                    <h1 class="slide-title">Test de Delegation</h1>
-                    <p class="slide-subtitle">Cette tache est-elle vraiment automatisable?</p>
+                    <h1 class="slide-title">🔧 Validation Technique</h1>
+                    <p class="slide-subtitle">Vérifie la faisabilité technique avant de commencer</p>
+                </div>
+
+                <div class="alert alert-info">
+                    💡 <strong>Pourquoi?</strong> Ces questions évitent les mauvaises surprises lors de l'implémentation.
+                </div>
+
+                <div class="tabs" id="techValidationTabs"></div>
+
+                <div id="techValidationContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔧</div>
+                        <p>Ajoute des automatisations en Page 4 pour valider la faisabilité</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: DELEGATION TEST + RISQUES -->
+            <section class="slide" data-slide="7">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 1 - Etape 4</div>
+                    <h1 class="slide-title">Test de Delegation + Risques</h1>
+                    <p class="slide-subtitle">Cette tache est-elle automatisable et quels sont les risques?</p>
                 </div>
 
                 <div class="alert alert-warning">
@@ -425,15 +617,15 @@
                 <div id="delegationContent">
                     <div class="empty-state">
                         <div class="empty-state-icon">📋</div>
-                        <p>Ajoute des automatisations en Page 3 pour commencer le test</p>
+                        <p>Ajoute des automatisations en Page 4 pour commencer le test</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SLIDE 6: ICE SCORING -->
-            <section class="slide" data-slide="6">
+            <!-- SLIDE 8: ICE SCORING -->
+            <section class="slide" data-slide="8">
                 <div class="slide-header">
-                    <div class="slide-badge">Phase 1 - Etape 4</div>
+                    <div class="slide-badge">Phase 1 - Etape 5</div>
                     <h1 class="slide-title">ICE Scoring</h1>
                     <p class="slide-subtitle">Priorise tes automatisations</p>
                 </div>
@@ -456,6 +648,7 @@
                             <tr>
                                 <th>Rank</th>
                                 <th>Automatisation</th>
+                                <th>Pain</th>
                                 <th>I</th>
                                 <th>C</th>
                                 <th>E</th>
@@ -463,18 +656,40 @@
                             </tr>
                         </thead>
                         <tbody id="iceTableBody">
-                            <tr><td colspan="6" class="empty-state">Ajoute des automatisations en Page 3</td></tr>
+                            <tr><td colspan="7" class="empty-state">Ajoute des automatisations en Page 4</td></tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- SLIDE 7: PROCESS MAPPING -->
-            <section class="slide" data-slide="7">
+            <!-- SLIDE 9: PRÉREQUIS PHASE 2 -->
+            <section class="slide" data-slide="9">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 2 - Préparation</div>
+                    <h1 class="slide-title">✅ Checklist Prérequis</h1>
+                    <p class="slide-subtitle">Vérifie que tu as tout pour commencer le mapping</p>
+                </div>
+
+                <div class="alert alert-warning">
+                    ⚠️ <strong>Important:</strong> Ne passe pas à la Phase 2 sans avoir validé ces points!
+                </div>
+
+                <div class="tabs" id="prerequisTabs"></div>
+
+                <div id="prerequisContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <p>Ajoute des automatisations en Page 4 pour voir la checklist</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 10: PROCESS MAPPING + EXCEPTIONS -->
+            <section class="slide" data-slide="10">
                 <div class="slide-header">
                     <div class="slide-badge">Phase 2 - Etape 1</div>
-                    <h1 class="slide-title">Process Mapping</h1>
-                    <p class="slide-subtitle">L'IA suggere le workflow pour chaque tache</p>
+                    <h1 class="slide-title">Process Mapping + Exceptions</h1>
+                    <p class="slide-subtitle">L'IA suggère le workflow ET la gestion des erreurs</p>
                 </div>
 
                 <div class="tabs" id="processTabs"></div>
@@ -482,13 +697,13 @@
                 <div id="processContent">
                     <div class="empty-state">
                         <div class="empty-state-icon">🔄</div>
-                        <p>Ajoute des automatisations en Page 3</p>
+                        <p>Ajoute des automatisations en Page 4</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SLIDE 8: TRIGGERS -->
-            <section class="slide" data-slide="8">
+            <!-- SLIDE 11: TRIGGERS -->
+            <section class="slide" data-slide="11">
                 <div class="slide-header">
                     <div class="slide-badge">Phase 2 - Etape 2</div>
                     <h1 class="slide-title">Workflow Triggers</h1>
@@ -500,13 +715,13 @@
                 <div id="triggerContent">
                     <div class="empty-state">
                         <div class="empty-state-icon">⚡</div>
-                        <p>Ajoute des automatisations en Page 3</p>
+                        <p>Ajoute des automatisations en Page 4</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SLIDE 9: DATA TRANSFORMATION -->
-            <section class="slide" data-slide="9">
+            <!-- SLIDE 12: DATA TRANSFORMATION -->
+            <section class="slide" data-slide="12">
                 <div class="slide-header">
                     <div class="slide-badge">Phase 2 - Etape 3</div>
                     <h1 class="slide-title">Data Transformation</h1>
@@ -518,13 +733,13 @@
                 <div id="dataContent">
                     <div class="empty-state">
                         <div class="empty-state-icon">🔄</div>
-                        <p>Ajoute des automatisations en Page 3</p>
+                        <p>Ajoute des automatisations en Page 4</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SLIDE 10: AI INTEGRATION -->
-            <section class="slide" data-slide="10">
+            <!-- SLIDE 13: AI INTEGRATION -->
+            <section class="slide" data-slide="13">
                 <div class="slide-header">
                     <div class="slide-badge">Phase 2 - Etape 4</div>
                     <h1 class="slide-title">Integration IA</h1>
@@ -536,13 +751,13 @@
                 <div id="aiContent">
                     <div class="empty-state">
                         <div class="empty-state-icon">🤖</div>
-                        <p>Ajoute des automatisations en Page 3</p>
+                        <p>Ajoute des automatisations en Page 4</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SLIDE 11: WIREFRAMING -->
-            <section class="slide" data-slide="11">
+            <!-- SLIDE 14: WIREFRAMING -->
+            <section class="slide" data-slide="14">
                 <div class="slide-header">
                     <div class="slide-badge">Phase 2 - Etape 5</div>
                     <h1 class="slide-title">Wireframing</h1>
@@ -554,13 +769,13 @@
                 <div id="wireframeContent">
                     <div class="empty-state">
                         <div class="empty-state-icon">📐</div>
-                        <p>Ajoute des automatisations en Page 3</p>
+                        <p>Ajoute des automatisations en Page 4</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SLIDE 12: CONTEXT ENGINEERING -->
-            <section class="slide" data-slide="12">
+            <!-- SLIDE 15: CONTEXT ENGINEERING -->
+            <section class="slide" data-slide="15">
                 <div class="slide-header">
                     <div class="slide-badge">Phase 2 - Etape 6</div>
                     <h1 class="slide-title">Context Engineering</h1>
@@ -572,13 +787,35 @@
                 <div id="contextContent">
                     <div class="empty-state">
                         <div class="empty-state-icon">🧠</div>
-                        <p>Ajoute des automatisations en Page 3</p>
+                        <p>Ajoute des automatisations en Page 4</p>
                     </div>
                 </div>
             </section>
 
-            <!-- SLIDE 13: RECAP -->
-            <section class="slide" data-slide="13">
+            <!-- SLIDE 16: MÉTRIQUES DE SUCCÈS -->
+            <section class="slide" data-slide="16">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 2 - Etape 7</div>
+                    <h1 class="slide-title">📊 Métriques de Succès</h1>
+                    <p class="slide-subtitle">Définis comment tu sauras si ça marche</p>
+                </div>
+
+                <div class="alert alert-info">
+                    💡 <strong>Pourquoi?</strong> Sans métriques, impossible de savoir si l'automatisation est un succès ou un échec.
+                </div>
+
+                <div class="tabs" id="metricsTabs"></div>
+
+                <div id="metricsContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>Ajoute des automatisations en Page 4</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 17: RECAP -->
+            <section class="slide" data-slide="17">
                 <div class="slide-header">
                     <div class="slide-badge">Recap</div>
                     <h1 class="slide-title">Felicitations! 🎉</h1>
@@ -653,14 +890,18 @@
         // ==================== STATE ====================
         let state = {
             currentSlide: 1,
-            totalSlides: 13,
+            totalSlides: 17,
             settings: {
                 openaiKey: '',
                 projectName: '',
                 hourlyRate: 50,
+                errorCost: 100,
                 supabaseUrl: '',
                 supabaseKey: '',
                 excalidrawKey: '',
+            },
+            discovery: {
+                q1: '', q2: '', q3: '', q4: '', q5: '', q6: '', q7: ''
             },
             automations: [],
         };
@@ -771,22 +1012,77 @@
                 return;
             }
 
+            // Time Lens détaillé
+            const timePrep = parseFloat(document.getElementById('newAutomationTimePrep')?.value) || 0;
+            const timeExec = parseFloat(document.getElementById('newAutomationTimeExec')?.value) || 0;
+            const timeCheck = parseFloat(document.getElementById('newAutomationTimeCheck')?.value) || 0;
+            const timeCorrect = parseFloat(document.getElementById('newAutomationTimeCorrect')?.value) || 0;
+            const totalTime = parseFloat(document.getElementById('newAutomationTime').value) || (timePrep + timeExec + timeCheck + timeCorrect);
+
+            // Pain Points
+            const painFrustration = parseInt(document.getElementById('newAutomationPainFrustration')?.value) || 3;
+            const painErrors = parseInt(document.getElementById('newAutomationPainErrors')?.value) || 3;
+            const painImpact = parseInt(document.getElementById('newAutomationPainImpact')?.value) || 3;
+            const painScore = painFrustration + painErrors + painImpact;
+
             const automation = {
                 id: Date.now(),
                 name: name,
                 description: desc,
                 category: document.getElementById('newAutomationCat').value,
                 frequency: document.getElementById('newAutomationFreq').value,
-                timePerWeek: parseFloat(document.getElementById('newAutomationTime').value) || 0,
+                timePerWeek: totalTime,
+                timeLens: {
+                    preparation: timePrep,
+                    execution: timeExec,
+                    verification: timeCheck,
+                    correction: timeCorrect
+                },
+                painPoints: {
+                    frustration: painFrustration,
+                    errors: painErrors,
+                    impact: painImpact,
+                    score: painScore
+                },
                 isDigital: document.getElementById('newAutomationDigital').value === 'true',
+                techValidation: {
+                    hasAPI: null,
+                    dataStructured: null,
+                    existingConnectors: null,
+                    dataCentralized: null,
+                    noDependencies: null,
+                    score: 0
+                },
                 delegation: { q1: null, q2: null, q3: null, q4: null, q5: null, score: 0 },
+                risks: {
+                    criticality: 'moderate',
+                    hasFallback: null,
+                    sensitiveData: null,
+                    reversible: null,
+                    needsSupervision: null,
+                    stakeholders: ''
+                },
+                prerequisites: {
+                    accessReady: false,
+                    credentialsReady: false,
+                    testDataReady: false,
+                    ownerValidated: false,
+                    scopeDefined: false
+                },
                 ice: { i: 5, c: 5, e: 5, score: 5 },
-                process: { trigger: '', actions: [], conditions: [], output: '' },
+                process: { trigger: '', actions: [], conditions: [], output: '', errorHandling: '' },
                 triggers: { suggestions: [], selected: '' },
                 data: { source: '', format: '', transform: '', destination: '' },
                 aiIntegration: { useCase: '', prompt: '' },
                 context: { working: '', shortTerm: '', longTerm: '', tools: [] },
                 wireframe: null,
+                metrics: {
+                    successRate: '',
+                    avgExecutionTime: '',
+                    manualInterventions: '',
+                    timeSavedActual: '',
+                    goal30Days: ''
+                }
             };
 
             state.automations.push(automation);
@@ -2347,6 +2643,343 @@ Réponds UNIQUEMENT en JSON valide avec ce format:
             document.getElementById('hourlyRate').value = state.settings.hourlyRate;
             document.getElementById('projectName').value = state.settings.projectName;
         }
+
+        // ==================== DISCOVERY QUESTIONS ====================
+        function saveDiscovery() {
+            for (let i = 1; i <= 7; i++) {
+                const el = document.getElementById(`discovery_q${i}`);
+                if (el) state.discovery[`q${i}`] = el.value;
+            }
+            saveState();
+        }
+
+        function loadDiscovery() {
+            for (let i = 1; i <= 7; i++) {
+                const el = document.getElementById(`discovery_q${i}`);
+                if (el && state.discovery) el.value = state.discovery[`q${i}`] || '';
+            }
+        }
+
+        // ==================== TECH VALIDATION ====================
+        function renderTechValidation() {
+            const tabs = document.getElementById('techValidationTabs');
+            const content = document.getElementById('techValidationContent');
+            if (!tabs || !content) return;
+
+            if (state.automations.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔧</div><p>Ajoute des automatisations en Page 4</p></div>';
+                return;
+            }
+
+            tabs.innerHTML = state.automations.map((a, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showTechValidation(${a.id})">${i + 1}. ${a.name.substring(0, 12)}...</div>
+            `).join('');
+
+            showTechValidation(state.automations[0].id);
+        }
+
+        function showTechValidation(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+            if (!a.techValidation) a.techValidation = { hasAPI: null, dataStructured: null, existingConnectors: null, dataCentralized: null, noDependencies: null, score: 0 };
+
+            document.querySelectorAll('#techValidationTabs .tab').forEach((t, i) => {
+                t.classList.toggle('active', state.automations[i]?.id === id);
+            });
+
+            const questions = [
+                { key: 'hasAPI', text: 'Les outils utilisés ont-ils des APIs ou webhooks?', tip: 'Vérifie sur Zapier/Make.com si des intégrations existent' },
+                { key: 'dataStructured', text: 'Les données sont-elles structurées?', tip: 'CSV, JSON, base de données vs texte libre' },
+                { key: 'existingConnectors', text: 'Des connecteurs existent déjà?', tip: 'Make, Zapier, n8n ont-ils des modules pour ces outils?' },
+                { key: 'dataCentralized', text: 'Les données sont-elles centralisées?', tip: 'Un seul endroit vs éparpillées dans plusieurs outils' },
+                { key: 'noDependencies', text: 'Pas de dépendances bloquantes?', tip: 'Cette tâche peut-elle s\'exécuter seule?' }
+            ];
+
+            const content = document.getElementById('techValidationContent');
+            content.innerHTML = `
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 0.5rem;">${a.name}</div>
+                    <div class="card-content" style="margin-bottom: 1.5rem; color: var(--text-muted);">${a.description || 'Pas de description'}</div>
+
+                    ${questions.map((q, i) => {
+                        const answer = a.techValidation[q.key];
+                        const isYes = answer === true;
+                        const isNo = answer === false;
+                        return `
+                        <div class="delegation-question" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-card); border: 1px solid ${isYes ? 'var(--accent-green)' : isNo ? 'var(--accent-red)' : 'var(--border)'}; border-radius: 10px; margin-bottom: 0.75rem;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; margin-bottom: 0.25rem;">${i + 1}. ${q.text}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${q.tip}</div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="setTechValidation(${id}, '${q.key}', true)"
+                                    style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid ${isYes ? 'var(--accent-green)' : 'var(--border)'}; background: ${isYes ? 'var(--accent-green)' : 'transparent'}; color: ${isYes ? '#fff' : 'var(--accent-green)'}; font-size: 1.25rem; cursor: pointer;">✓</button>
+                                <button onclick="setTechValidation(${id}, '${q.key}', false)"
+                                    style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid ${isNo ? 'var(--accent-red)' : 'var(--border)'}; background: ${isNo ? 'var(--accent-red)' : 'transparent'}; color: ${isNo ? '#fff' : 'var(--accent-red)'}; font-size: 1.25rem; cursor: pointer;">✗</button>
+                            </div>
+                        </div>
+                    `}).join('')}
+
+                    <div class="stat-card" style="margin-top: 1.5rem; border: 2px solid ${a.techValidation.score >= 4 ? 'var(--accent-green)' : a.techValidation.score >= 2 ? 'var(--accent-orange)' : 'var(--accent-red)'};">
+                        <div class="stat-value" style="color: ${a.techValidation.score >= 4 ? 'var(--accent-green)' : a.techValidation.score >= 2 ? 'var(--accent-orange)' : 'var(--accent-red)'};">${a.techValidation.score || 0}/5</div>
+                        <div class="stat-label">${a.techValidation.score >= 4 ? '✅ Techniquement faisable!' : a.techValidation.score >= 2 ? '⚠️ Quelques obstacles' : '❌ Obstacles majeurs'}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setTechValidation(id, key, value) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+            if (!a.techValidation) a.techValidation = {};
+            a.techValidation[key] = value;
+            a.techValidation.score = ['hasAPI', 'dataStructured', 'existingConnectors', 'dataCentralized', 'noDependencies']
+                .filter(k => a.techValidation[k] === true).length;
+            saveState();
+            showTechValidation(id);
+        }
+
+        // ==================== PREREQUISITES ====================
+        function renderPrerequis() {
+            const tabs = document.getElementById('prerequisTabs');
+            const content = document.getElementById('prerequisContent');
+            if (!tabs || !content) return;
+
+            if (state.automations.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>Ajoute des automatisations en Page 4</p></div>';
+                return;
+            }
+
+            tabs.innerHTML = state.automations.map((a, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showPrerequis(${a.id})">${i + 1}. ${a.name.substring(0, 12)}...</div>
+            `).join('');
+
+            showPrerequis(state.automations[0].id);
+        }
+
+        function showPrerequis(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+            if (!a.prerequisites) a.prerequisites = { accessReady: false, credentialsReady: false, testDataReady: false, ownerValidated: false, scopeDefined: false };
+
+            document.querySelectorAll('#prerequisTabs .tab').forEach((t, i) => {
+                t.classList.toggle('active', state.automations[i]?.id === id);
+            });
+
+            const items = [
+                { key: 'accessReady', text: 'Accès aux outils disponibles', icon: '🔑' },
+                { key: 'credentialsReady', text: 'Credentials/API keys prêts', icon: '🔐' },
+                { key: 'testDataReady', text: 'Données de test existantes', icon: '📊' },
+                { key: 'ownerValidated', text: 'Owner du processus a validé', icon: '✍️' },
+                { key: 'scopeDefined', text: 'Scope bien défini (pas de scope creep)', icon: '📋' }
+            ];
+
+            const checkedCount = items.filter(item => a.prerequisites[item.key]).length;
+
+            document.getElementById('prerequisContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 1rem;">${a.name}</div>
+
+                    ${items.map(item => `
+                        <div class="checklist-item ${a.prerequisites[item.key] ? 'checked' : ''}" onclick="togglePrerequis(${id}, '${item.key}')">
+                            <input type="checkbox" ${a.prerequisites[item.key] ? 'checked' : ''} onclick="event.stopPropagation(); togglePrerequis(${id}, '${item.key}')">
+                            <span>${item.icon} ${item.text}</span>
+                        </div>
+                    `).join('')}
+
+                    <div class="stat-card" style="margin-top: 1.5rem; border: 2px solid ${checkedCount === 5 ? 'var(--accent-green)' : checkedCount >= 3 ? 'var(--accent-orange)' : 'var(--accent-red)'};">
+                        <div class="stat-value" style="color: ${checkedCount === 5 ? 'var(--accent-green)' : checkedCount >= 3 ? 'var(--accent-orange)' : 'var(--accent-red)'};">${checkedCount}/5</div>
+                        <div class="stat-label">${checkedCount === 5 ? '✅ Prêt pour Phase 2!' : checkedCount >= 3 ? '⚠️ Presque prêt' : '❌ Prérequis manquants'}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function togglePrerequis(id, key) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+            if (!a.prerequisites) a.prerequisites = {};
+            a.prerequisites[key] = !a.prerequisites[key];
+            saveState();
+            showPrerequis(id);
+        }
+
+        // ==================== METRICS ====================
+        function renderMetrics() {
+            const tabs = document.getElementById('metricsTabs');
+            const content = document.getElementById('metricsContent');
+            if (!tabs || !content) return;
+
+            if (state.automations.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><p>Ajoute des automatisations en Page 4</p></div>';
+                return;
+            }
+
+            tabs.innerHTML = state.automations.map((a, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showMetrics(${a.id})">${i + 1}. ${a.name.substring(0, 12)}...</div>
+            `).join('');
+
+            showMetrics(state.automations[0].id);
+        }
+
+        function showMetrics(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+            if (!a.metrics) a.metrics = { successRate: '', avgExecutionTime: '', manualInterventions: '', timeSavedActual: '', goal30Days: '' };
+
+            document.querySelectorAll('#metricsTabs .tab').forEach((t, i) => {
+                t.classList.toggle('active', state.automations[i]?.id === id);
+            });
+
+            document.getElementById('metricsContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 1rem;">${a.name}</div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">🎯 Taux de succès cible (%)</label>
+                            <input class="form-input" type="number" min="0" max="100" placeholder="Ex: 95" value="${a.metrics.successRate || ''}" onchange="updateMetrics(${id}, 'successRate', this.value)">
+                            <div class="form-hint">% d'exécutions sans erreur</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">⏱️ Temps d'exécution moyen</label>
+                            <input class="form-input" placeholder="Ex: 30 secondes" value="${a.metrics.avgExecutionTime || ''}" onchange="updateMetrics(${id}, 'avgExecutionTime', this.value)">
+                            <div class="form-hint">Durée moyenne d'une exécution</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">👋 Interventions manuelles/semaine</label>
+                            <input class="form-input" type="number" min="0" placeholder="Ex: 2" value="${a.metrics.manualInterventions || ''}" onchange="updateMetrics(${id}, 'manualInterventions', this.value)">
+                            <div class="form-hint">Nombre max acceptable</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">💰 Temps réel économisé cible</label>
+                            <input class="form-input" placeholder="Ex: ${a.timePerWeek}h/sem" value="${a.metrics.timeSavedActual || ''}" onchange="updateMetrics(${id}, 'timeSavedActual', this.value)">
+                            <div class="form-hint">vs estimation de ${a.timePerWeek}h/sem</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🎯 Objectif à 30 jours</label>
+                        <textarea class="form-input" placeholder="Ex: L'automatisation tourne sans intervention manuelle pendant 30 jours consécutifs" onchange="updateMetrics(${id}, 'goal30Days', this.value)">${a.metrics.goal30Days || ''}</textarea>
+                    </div>
+
+                    <button class="btn btn-ai" onclick="suggestMetrics(${id})">🤖 Suggérer des métriques</button>
+                </div>
+            `;
+        }
+
+        function updateMetrics(id, key, value) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+            if (!a.metrics) a.metrics = {};
+            a.metrics[key] = value;
+            saveState();
+        }
+
+        async function suggestMetrics(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            const prompt = `Pour cette automatisation, suggère des métriques de succès réalistes:
+
+Nom: ${a.name}
+Description: ${a.description}
+Temps économisé estimé: ${a.timePerWeek}h/semaine
+Catégorie: ${a.category}
+
+Réponds en JSON:
+{
+  "successRate": "95",
+  "avgExecutionTime": "30 secondes",
+  "manualInterventions": "2",
+  "timeSavedActual": "${a.timePerWeek}h/semaine",
+  "goal30Days": "Description de l'objectif"
+}`;
+
+            const res = await callOpenAI(prompt);
+            if (res) {
+                try {
+                    const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+                    a.metrics = json;
+                    saveState();
+                    showMetrics(id);
+                } catch (e) {}
+            }
+        }
+
+        // ==================== UPDATE UI ENHANCED ====================
+        // Ajout des appels aux nouvelles fonctions de rendu
+        const originalUpdateUI = updateUI;
+        updateUI = function() {
+            // Slides
+            document.querySelectorAll('.slide').forEach((s, i) => {
+                s.classList.toggle('active', i + 1 === state.currentSlide);
+            });
+
+            // Counter
+            document.getElementById('slideCounter').textContent = `${state.currentSlide} / ${state.totalSlides}`;
+
+            // Progress
+            document.getElementById('progressFill').style.width = `${(state.currentSlide / state.totalSlides) * 100}%`;
+
+            // Buttons
+            document.getElementById('prevBtn').disabled = state.currentSlide === 1;
+            document.getElementById('nextBtn').disabled = state.currentSlide === state.totalSlides;
+
+            // Update dynamic content
+            loadDiscovery();
+            renderAutomationsList();
+            renderROITable();
+            renderTechValidation();
+            renderDelegationTest();
+            renderICETable();
+            renderPrerequis();
+            renderProcessMapping();
+            renderTriggers();
+            renderDataTransformation();
+            renderAIIntegration();
+            renderWireframe();
+            renderContextEngineering();
+            renderMetrics();
+            renderRecap();
+
+            saveState();
+        };
+
+        // ==================== PAIN SCORE PREVIEW ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Auto-calculate total time
+            ['newAutomationTimePrep', 'newAutomationTimeExec', 'newAutomationTimeCheck', 'newAutomationTimeCorrect'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', () => {
+                        const prep = parseFloat(document.getElementById('newAutomationTimePrep')?.value) || 0;
+                        const exec = parseFloat(document.getElementById('newAutomationTimeExec')?.value) || 0;
+                        const check = parseFloat(document.getElementById('newAutomationTimeCheck')?.value) || 0;
+                        const correct = parseFloat(document.getElementById('newAutomationTimeCorrect')?.value) || 0;
+                        document.getElementById('newAutomationTime').value = (prep + exec + check + correct).toFixed(2);
+                    });
+                }
+            });
+
+            // Auto-calculate pain score preview
+            ['newAutomationPainFrustration', 'newAutomationPainErrors', 'newAutomationPainImpact'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('change', () => {
+                        const f = parseInt(document.getElementById('newAutomationPainFrustration')?.value) || 3;
+                        const e = parseInt(document.getElementById('newAutomationPainErrors')?.value) || 3;
+                        const i = parseInt(document.getElementById('newAutomationPainImpact')?.value) || 3;
+                        const preview = document.getElementById('painScorePreview');
+                        if (preview) preview.textContent = `${f + e + i}/15`;
+                    });
+                }
+            });
+        });
 
         // Auto-save every 30 seconds
         setInterval(saveState, 30000);
