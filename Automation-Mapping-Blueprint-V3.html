@@ -1403,6 +1403,8 @@ Reponds en JSON:
                 t.classList.toggle('active', state.automations[i]?.id === id);
             });
 
+            const hasAISuggestion = a.aiIntegration.prompt && a.aiIntegration.prompt.length > 10;
+
             document.getElementById('aiContent').innerHTML = `
                 <div class="card">
                     <div class="card-header">
@@ -1422,12 +1424,44 @@ Reponds en JSON:
                         </select>
                     </div>
 
+                    ${a.aiIntegration.useCaseExplanation ? `
+                        <div class="ai-suggestion" style="margin-bottom: 1rem;">
+                            <div class="ai-suggestion-header">💡 Pourquoi ce use case</div>
+                            <div class="ai-suggestion-content">${a.aiIntegration.useCaseExplanation}</div>
+                        </div>
+                    ` : ''}
+
                     <div class="form-group">
-                        <label class="form-label">Prompt Template</label>
-                        <textarea class="form-input" style="min-height: 120px;" placeholder="Le prompt a utiliser..." onchange="updateAIIntegration(${id}, 'prompt', this.value)">${a.aiIntegration.prompt || ''}</textarea>
+                        <label class="form-label">Prompt Template ${hasAISuggestion ? '✅' : ''}</label>
+                        <textarea class="form-input" style="min-height: 200px; font-family: monospace; font-size: 0.85rem;" placeholder="Clique sur 'Suggerer' pour generer un prompt..." onchange="updateAIIntegration(${id}, 'prompt', this.value)">${a.aiIntegration.prompt || ''}</textarea>
+                        ${hasAISuggestion ? `<button class="btn btn-secondary" style="margin-top: 0.5rem;" onclick="copyPrompt(${id})">📋 Copier le prompt</button>` : ''}
                     </div>
+
+                    ${a.aiIntegration.expectedOutput ? `
+                        <div class="form-group">
+                            <label class="form-label">📤 Output attendu</label>
+                            <div class="card" style="margin: 0; background: var(--bg-input);">
+                                <div class="card-content">${a.aiIntegration.expectedOutput}</div>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${a.aiIntegration.tips ? `
+                        <div class="alert alert-info">
+                            <strong>💡 Tips:</strong> ${a.aiIntegration.tips}
+                        </div>
+                    ` : ''}
                 </div>
             `;
+        }
+
+        function copyPrompt(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (a && a.aiIntegration.prompt) {
+                navigator.clipboard.writeText(a.aiIntegration.prompt).then(() => {
+                    alert('✅ Prompt copie dans le presse-papier!');
+                });
+            }
         }
 
         function updateAIIntegration(id, key, value) {
@@ -1442,22 +1476,67 @@ Reponds en JSON:
             const a = state.automations.find(x => x.id === id);
             if (!a) return;
 
-            const prompt = `Pour cette automatisation, suggere comment integrer l'IA:
-Nom: ${a.name}
-Description: ${a.description}
-Process: ${a.process.trigger} -> ${a.process.actions?.join(' -> ')} -> ${a.process.output}
+            // Afficher loading
+            const btn = document.querySelector(`[onclick="suggestAI(${id})"]`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading">Generation</span>';
+            }
 
-Reponds en JSON:
-{"useCase": "generation|classification|extraction|summarization|decision", "prompt": "template de prompt a utiliser"}`;
+            const prompt = `Tu es un expert en automatisation et en prompt engineering.
+
+Pour cette automatisation, tu dois:
+1. Identifier le meilleur use case IA
+2. Generer un PROMPT TEMPLATE complet et professionnel que l'utilisateur pourra utiliser directement dans son workflow
+
+AUTOMATISATION:
+- Nom: ${a.name}
+- Description: ${a.description}
+- Categorie: ${a.category || 'Non definie'}
+- Trigger: ${a.process.trigger || 'Non defini'}
+- Actions: ${a.process.actions?.join(' -> ') || 'Non definies'}
+- Output: ${a.process.output || 'Non defini'}
+- Source de donnees: ${a.data?.source || 'Non definie'}
+- Destination: ${a.data?.destination || 'Non definie'}
+
+INSTRUCTIONS:
+- Le prompt template doit etre DIRECTEMENT UTILISABLE
+- Utilise des variables entre {{crochets}} pour les parties dynamiques
+- Le prompt doit etre en francais
+- Inclus des instructions claires pour l'IA
+- Specifie le format de sortie attendu
+
+Reponds UNIQUEMENT en JSON valide:
+{
+  "useCase": "generation|classification|extraction|summarization|decision",
+  "useCaseExplanation": "Explication courte de pourquoi ce use case",
+  "prompt": "Le prompt template complet avec {{variables}}",
+  "expectedOutput": "Description du format de sortie attendu",
+  "tips": "Conseils pour optimiser ce prompt"
+}`;
 
             const res = await callOpenAI(prompt);
             if (res) {
                 try {
                     const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
-                    a.aiIntegration = json;
+                    a.aiIntegration = {
+                        useCase: json.useCase,
+                        useCaseExplanation: json.useCaseExplanation,
+                        prompt: json.prompt,
+                        expectedOutput: json.expectedOutput,
+                        tips: json.tips
+                    };
                     saveState();
                     showAI(id);
-                } catch (e) {}
+                } catch (e) {
+                    console.error('Erreur parsing:', e);
+                    alert('Erreur lors de la generation. Reessaie.');
+                }
+            }
+
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '🤖 Suggerer';
             }
         }
 
