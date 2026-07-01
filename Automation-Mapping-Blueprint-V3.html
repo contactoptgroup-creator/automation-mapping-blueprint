@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Blueprint V3 - AI Powered</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #070810;
+            --bg-card: #0d0f1a;
+            --bg-input: #12141f;
+            --accent: #3b82f6;
+            --accent-gold: #d4af37;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+            --text: #f4f4f5;
+            --text-dim: #a1a1aa;
+            --text-muted: #52525b;
+            --border: rgba(255,255,255,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+        /* LAYOUT */
+        .app { display: flex; flex-direction: column; min-height: 100vh; }
+        .header { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: rgba(7,8,16,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; z-index: 100; }
+        .logo { font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .logo-badge { background: var(--accent); color: #fff; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; }
+        .header-actions { display: flex; gap: 0.75rem; align-items: center; }
+        .slide-counter { font-family: monospace; color: var(--text-dim); font-size: 0.85rem; }
+
+        .main { flex: 1; padding: 80px 1.5rem 100px; max-width: 900px; margin: 0 auto; width: 100%; }
+
+        .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: rgba(7,8,16,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 1rem; z-index: 100; }
+        .progress-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--border); }
+        .progress-fill { height: 100%; background: var(--accent); transition: width 0.4s; }
+
+        /* BUTTONS */
+        .btn { padding: 0.75rem 1.25rem; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--accent); }
+        .btn-ghost { background: transparent; color: var(--text-dim); }
+        .btn-ghost:hover { color: var(--text); }
+        .btn-success { background: var(--accent-green); color: #fff; }
+        .btn-icon { width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-ai { background: linear-gradient(135deg, #8b5cf6, #3b82f6); }
+
+        /* FORMS */
+        .form-group { margin-bottom: 1.25rem; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-dim); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input { width: 100%; padding: 0.75rem 1rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; transition: all 0.2s; }
+        .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+        .form-input::placeholder { color: var(--text-muted); }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+        .form-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        select.form-input { cursor: pointer; }
+        textarea.form-input { min-height: 80px; resize: vertical; }
+
+        /* CARDS */
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; transition: all 0.2s; }
+        .card:hover { border-color: rgba(59,130,246,0.3); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+        .card-title { font-size: 1rem; font-weight: 600; }
+        .card-badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 4px; background: var(--accent); color: #fff; }
+        .card-content { color: var(--text-dim); font-size: 0.9rem; }
+
+        /* TABLES */
+        .table-container { overflow-x: auto; margin: 1rem 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); background: var(--bg-input); }
+        td { color: var(--text-dim); }
+        tr:hover td { background: rgba(59,130,246,0.05); }
+        td input { background: transparent; border: 1px solid transparent; color: var(--text); padding: 0.4rem; width: 100%; border-radius: 4px; }
+        td input:focus { outline: none; border-color: var(--accent); background: var(--bg-input); }
+        .rank-1 { color: var(--accent-gold); font-weight: 700; }
+        .rank-2 { color: #c0c0c0; font-weight: 600; }
+        .rank-3 { color: #cd7f32; font-weight: 600; }
+
+        /* SLIDE CONTENT */
+        .slide { display: none; animation: fadeIn 0.4s ease; }
+        .slide.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .slide-header { text-align: center; margin-bottom: 2rem; }
+        .slide-badge { display: inline-block; padding: 0.3rem 0.75rem; background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); border-radius: 20px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 0.75rem; }
+        .slide-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .slide-subtitle { color: var(--text-dim); font-size: 1rem; }
+
+        /* COMPONENTS */
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
+        .alert-info { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: var(--accent); }
+        .alert-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); color: var(--accent-green); }
+        .alert-warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: var(--accent-orange); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; text-align: center; }
+        .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        .checklist-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s; }
+        .checklist-item:hover { border-color: var(--accent); }
+        .checklist-item.checked { border-color: var(--accent-green); background: rgba(34,197,94,0.05); }
+        .checklist-item input { width: 18px; height: 18px; accent-color: var(--accent-green); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+        .checklist-item span { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; }
+        .checklist-item.checked span { color: var(--text-muted); }
+
+        .automation-list { margin: 1rem 0; }
+        .automation-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 0.75rem; }
+        .automation-item:hover { border-color: var(--accent); }
+        .automation-number { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+        .automation-info { flex: 1; min-width: 0; }
+        .automation-name { font-weight: 600; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .automation-meta { font-size: 0.8rem; color: var(--text-muted); }
+        .automation-actions { display: flex; gap: 0.5rem; }
+
+        .ai-suggestion { background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.05)); border: 1px solid rgba(139,92,246,0.2); border-radius: 10px; padding: 1rem; margin: 1rem 0; }
+        .ai-suggestion-header { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #a78bfa; margin-bottom: 0.5rem; }
+        .ai-suggestion-content { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; }
+
+        .process-flow { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+        .process-step { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; }
+        .process-step-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .process-step-icon.trigger { background: rgba(245,158,11,0.2); color: var(--accent-orange); }
+        .process-step-icon.action { background: rgba(59,130,246,0.2); color: var(--accent); }
+        .process-step-icon.condition { background: rgba(139,92,246,0.2); color: #a78bfa; }
+        .process-step-icon.output { background: rgba(34,197,94,0.2); color: var(--accent-green); }
+        .process-step-content { flex: 1; }
+        .process-step-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; }
+        .process-step-text { font-size: 0.9rem; }
+
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; overflow-x: auto; }
+        .tab { padding: 0.5rem 1rem; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; border-radius: 6px; white-space: nowrap; transition: all 0.2s; }
+        .tab:hover { color: var(--text); background: var(--bg-card); }
+        .tab.active { color: var(--accent); background: rgba(59,130,246,0.1); }
+
+        .loading { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); }
+        .loading::after { content: ''; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+
+        /* SETTINGS MODAL */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { padding: 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 1.1rem; font-weight: 600; }
+        .modal-body { padding: 1.25rem; }
+        .modal-footer { padding: 1.25rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; }
+
+        /* RESPONSIVE */
+        @media (max-width: 640px) {
+            .header { padding: 0 1rem; }
+            .main { padding: 70px 1rem 90px; }
+            .slide-title { font-size: 1.4rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo">
+                <span>Blueprint</span>
+                <span class="logo-badge">V3</span>
+            </div>
+            <div class="header-actions">
+                <span class="slide-counter" id="slideCounter">1 / 13</span>
+                <button class="btn btn-ghost btn-icon" onclick="openSettings()" title="Settings">⚙️</button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="main" id="slidesContainer">
+            <!-- SLIDE 1: WELCOME -->
+            <section class="slide active" data-slide="1">
+                <div class="slide-header">
+                    <div class="slide-badge">Bienvenue</div>
+                    <h1 class="slide-title">Automation Blueprint V3</h1>
+                    <p class="slide-subtitle">Ton assistant AI pour mapper tes automatisations</p>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>🚀 Nouveau:</strong> L'IA te guide a chaque etape avec des suggestions personnalisees basees sur TES taches.
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">10</div>
+                        <div class="stat-label">Automatisations max</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">13</div>
+                        <div class="stat-label">Etapes guidees</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">AI</div>
+                        <div class="stat-label">Suggestions</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">⚡ Configuration rapide</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label class="form-label">Cle API OpenAI (pour les suggestions IA)</label>
+                            <input type="password" class="form-input" id="openaiKey" placeholder="sk-...">
+                            <div class="form-hint">Stockee localement, jamais envoyee ailleurs qu'a OpenAI</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nom du projet</label>
+                            <input type="text" class="form-input" id="projectName" placeholder="Ex: OPTIMI Group - Guest Automation">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">☁️ Supabase (optionnel)</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Supabase URL</label>
+                                <input type="text" class="form-input" id="supabaseUrl" placeholder="https://xxx.supabase.co">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Anon Key</label>
+                                <input type="password" class="form-input" id="supabaseKey" placeholder="eyJ...">
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="testSupabase()">Tester la connexion</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 2: INTRO -->
+            <section class="slide" data-slide="2">
+                <div class="slide-header">
+                    <div class="slide-badge">Introduction</div>
+                    <h1 class="slide-title">Comment ca marche</h1>
+                    <p class="slide-subtitle">13 etapes pour mapper tes automatisations comme un pro</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 1rem;">📋 Phase 1: Identifier (Pages 3-6)</div>
+                    <div class="card-content">
+                        <p>• Lister jusqu'a 10 taches a automatiser</p>
+                        <p>• Calculer le ROI de chaque automatisation</p>
+                        <p>• Tester si elles sont automatisables</p>
+                        <p>• Prioriser avec le scoring ICE</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 1rem;">🤖 Phase 2: Mapper avec l'IA (Pages 7-12)</div>
+                    <div class="card-content">
+                        <p>• Process mapping suggere par l'IA</p>
+                        <p>• Triggers et data transformation</p>
+                        <p>• Points d'integration IA</p>
+                        <p>• Wireframing du workflow</p>
+                    </div>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>💡 Astuce:</strong> L'IA te donne des suggestions que tu peux corriger. Tu gardes le controle!
+                </div>
+            </section>
+
+            <!-- SLIDE 3: PERSONAL AUDIT -->
+            <section class="slide" data-slide="3">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 1 - Etape 1</div>
+                    <h1 class="slide-title">Tes Automatisations</h1>
+                    <p class="slide-subtitle">Liste jusqu'a 10 taches que tu veux automatiser</p>
+                </div>
+
+                <div class="alert alert-info">
+                    💡 <strong>Tips du cours:</strong> Focus sur les taches repetitives, chronophages, et sujettes aux erreurs.
+                </div>
+
+                <div id="automationsList" class="automation-list"></div>
+
+                <div class="card" id="addAutomationForm">
+                    <div class="card-title" style="margin-bottom: 1rem;">+ Ajouter une automatisation</div>
+                    <div class="form-group">
+                        <label class="form-label">Nom de la tache</label>
+                        <input type="text" class="form-input" id="newAutomationName" placeholder="Ex: Repondre aux emails de reservation">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-input" id="newAutomationDesc" placeholder="Decris ce que tu fais exactement..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Categorie</label>
+                            <select class="form-input" id="newAutomationCat">
+                                <option value="">Choisir...</option>
+                                <option value="communication">Communication</option>
+                                <option value="admin">Admin</option>
+                                <option value="data">Data / CRM</option>
+                                <option value="finance">Finance</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="operations">Operations</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Frequence</label>
+                            <select class="form-input" id="newAutomationFreq">
+                                <option value="">Choisir...</option>
+                                <option value="daily">Quotidien</option>
+                                <option value="weekly">Hebdomadaire</option>
+                                <option value="monthly">Mensuel</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Temps/semaine (heures)</label>
+                            <input type="number" class="form-input" id="newAutomationTime" placeholder="2" min="0" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tache digitale?</label>
+                            <select class="form-input" id="newAutomationDigital">
+                                <option value="true">Oui</option>
+                                <option value="false">Non</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addAutomation()">Ajouter cette automatisation</button>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: INCOME LENS -->
+            <section class="slide" data-slide="4">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 1 - Etape 2</div>
+                    <h1 class="slide-title">Income Lens</h1>
+                    <p class="slide-subtitle">Calcule le ROI de chaque automatisation</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Ton taux horaire (EUR)</label>
+                    <input type="number" class="form-input" id="hourlyRate" value="50" min="0" style="max-width: 150px;" oninput="calculateAllROI()">
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Automatisation</th>
+                                <th>Temps/sem</th>
+                                <th>ROI Annuel</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roiTableBody">
+                            <tr><td colspan="4" class="empty-state">Ajoute des automatisations en Page 3</td></tr>
+                        </tbody>
+                        <tfoot id="roiTableFoot" style="display: none;">
+                            <tr style="background: var(--bg-input);">
+                                <td colspan="2"><strong>TOTAL</strong></td>
+                                <td id="totalTime">0h</td>
+                                <td id="totalROI" style="color: var(--accent-green); font-weight: 700;">0 €</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="alert alert-success" id="roiAlert" style="display: none;">
+                    🎉 <strong>Formule:</strong> ROI Annuel = Temps/semaine × Taux horaire × 52 semaines
+                </div>
+            </section>
+
+            <!-- SLIDE 5: DELEGATION TEST -->
+            <section class="slide" data-slide="5">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 1 - Etape 3</div>
+                    <h1 class="slide-title">Test de Delegation</h1>
+                    <p class="slide-subtitle">Cette tache est-elle vraiment automatisable?</p>
+                </div>
+
+                <div class="alert alert-warning">
+                    ⚠️ <strong>Regle d'or:</strong> Si tu ne peux pas expliquer la tache etape par etape, tu ne peux pas l'automatiser.
+                </div>
+
+                <div class="tabs" id="delegationTabs"></div>
+
+                <div id="delegationContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>Ajoute des automatisations en Page 3 pour commencer le test</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 6: ICE SCORING -->
+            <section class="slide" data-slide="6">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 1 - Etape 4</div>
+                    <h1 class="slide-title">ICE Scoring</h1>
+                    <p class="slide-subtitle">Priorise tes automatisations</p>
+                </div>
+
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="form-row">
+                        <div><strong>I</strong> = Impact (temps/argent economise)</div>
+                        <div><strong>C</strong> = Confidence (certitude que ca marche)</div>
+                        <div><strong>E</strong> = Ease (facilite d'implementation)</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-ai" onclick="getAISuggestionsICE()" id="btnAIice">
+                    🤖 Suggestions IA pour les scores
+                </button>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Automatisation</th>
+                                <th>I</th>
+                                <th>C</th>
+                                <th>E</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="iceTableBody">
+                            <tr><td colspan="6" class="empty-state">Ajoute des automatisations en Page 3</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: PROCESS MAPPING -->
+            <section class="slide" data-slide="7">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 2 - Etape 1</div>
+                    <h1 class="slide-title">Process Mapping</h1>
+                    <p class="slide-subtitle">L'IA suggere le workflow pour chaque tache</p>
+                </div>
+
+                <div class="tabs" id="processTabs"></div>
+
+                <div id="processContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔄</div>
+                        <p>Ajoute des automatisations en Page 3</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 8: TRIGGERS -->
+            <section class="slide" data-slide="8">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 2 - Etape 2</div>
+                    <h1 class="slide-title">Workflow Triggers</h1>
+                    <p class="slide-subtitle">Qu'est-ce qui demarre chaque automatisation?</p>
+                </div>
+
+                <div class="tabs" id="triggerTabs"></div>
+
+                <div id="triggerContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚡</div>
+                        <p>Ajoute des automatisations en Page 3</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 9: DATA TRANSFORMATION -->
+            <section class="slide" data-slide="9">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 2 - Etape 3</div>
+                    <h1 class="slide-title">Data Transformation</h1>
+                    <p class="slide-subtitle">D'ou viennent les donnees et ou vont-elles?</p>
+                </div>
+
+                <div class="tabs" id="dataTabs"></div>
+
+                <div id="dataContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔄</div>
+                        <p>Ajoute des automatisations en Page 3</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 10: AI INTEGRATION -->
+            <section class="slide" data-slide="10">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 2 - Etape 4</div>
+                    <h1 class="slide-title">Integration IA</h1>
+                    <p class="slide-subtitle">Ou l'IA peut-elle ajouter de la valeur?</p>
+                </div>
+
+                <div class="tabs" id="aiTabs"></div>
+
+                <div id="aiContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🤖</div>
+                        <p>Ajoute des automatisations en Page 3</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 11: WIREFRAMING -->
+            <section class="slide" data-slide="11">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 2 - Etape 5</div>
+                    <h1 class="slide-title">Wireframing</h1>
+                    <p class="slide-subtitle">Dessine le blueprint de tes workflows</p>
+                </div>
+
+                <div class="alert alert-info">
+                    📐 L'integration Excalidraw arrive bientot! En attendant, utilise les liens ci-dessous.
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Outils de wireframing recommandes</div>
+                    <div class="card-content" style="margin-top: 1rem;">
+                        <p>• <a href="https://excalidraw.com" target="_blank" style="color: var(--accent);">Excalidraw</a> - Simple et gratuit</p>
+                        <p>• <a href="https://miro.com" target="_blank" style="color: var(--accent);">Miro</a> - Collaboratif</p>
+                        <p>• <a href="https://whimsical.com" target="_blank" style="color: var(--accent);">Whimsical</a> - Flowcharts clean</p>
+                    </div>
+                </div>
+
+                <div id="wireframeContent"></div>
+            </section>
+
+            <!-- SLIDE 12: CONTEXT ENGINEERING -->
+            <section class="slide" data-slide="12">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 2 - Etape 6</div>
+                    <h1 class="slide-title">Context Engineering</h1>
+                    <p class="slide-subtitle">Donne le bon contexte a tes agents IA</p>
+                </div>
+
+                <div class="tabs" id="contextTabs"></div>
+
+                <div id="contextContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🧠</div>
+                        <p>Ajoute des automatisations en Page 3</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 13: RECAP -->
+            <section class="slide" data-slide="13">
+                <div class="slide-header">
+                    <div class="slide-badge">Recap</div>
+                    <h1 class="slide-title">Felicitations! 🎉</h1>
+                    <p class="slide-subtitle">Voici le resume de tes automatisations</p>
+                </div>
+
+                <div class="stats-grid" id="recapStats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="recapCount">0</div>
+                        <div class="stat-label">Automatisations</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="recapTime">0h</div>
+                        <div class="stat-label">Temps economise/sem</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="recapROI">0€</div>
+                        <div class="stat-label">ROI annuel</div>
+                    </div>
+                </div>
+
+                <div id="recapList"></div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="exportJSON()">📥 Export JSON</button>
+                    <button class="btn btn-secondary" onclick="saveToSupabase()">☁️ Sauvegarder Cloud</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- FOOTER NAV -->
+        <footer class="footer-nav">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 7.7%;"></div>
+            </div>
+            <button class="btn btn-secondary btn-icon" id="prevBtn" onclick="prevSlide()" disabled>←</button>
+            <button class="btn btn-primary btn-icon" id="nextBtn" onclick="nextSlide()">→</button>
+        </footer>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">⚙️ Parametres</span>
+                <button class="btn btn-ghost" onclick="closeSettings()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Cle API OpenAI</label>
+                    <input type="password" class="form-input" id="settingsOpenAI" placeholder="sk-...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Supabase URL</label>
+                    <input type="text" class="form-input" id="settingsSupabaseUrl" placeholder="https://xxx.supabase.co">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Supabase Anon Key</label>
+                    <input type="password" class="form-input" id="settingsSupabaseKey" placeholder="eyJ...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSettings()">Annuler</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== STATE ====================
+        let state = {
+            currentSlide: 1,
+            totalSlides: 13,
+            settings: {
+                openaiKey: '',
+                supabaseUrl: '',
+                supabaseKey: '',
+                projectName: '',
+                hourlyRate: 50,
+            },
+            automations: [],
+            supabase: null,
+        };
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            updateUI();
+            setupKeyboard();
+        });
+
+        function loadState() {
+            const saved = localStorage.getItem('blueprintV3');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state = { ...state, ...parsed };
+                document.getElementById('openaiKey').value = state.settings.openaiKey || '';
+                document.getElementById('projectName').value = state.settings.projectName || '';
+                document.getElementById('supabaseUrl').value = state.settings.supabaseUrl || '';
+                document.getElementById('supabaseKey').value = state.settings.supabaseKey || '';
+                document.getElementById('hourlyRate').value = state.settings.hourlyRate || 50;
+            }
+        }
+
+        function saveState() {
+            state.settings.openaiKey = document.getElementById('openaiKey')?.value || state.settings.openaiKey;
+            state.settings.projectName = document.getElementById('projectName')?.value || state.settings.projectName;
+            state.settings.supabaseUrl = document.getElementById('supabaseUrl')?.value || state.settings.supabaseUrl;
+            state.settings.supabaseKey = document.getElementById('supabaseKey')?.value || state.settings.supabaseKey;
+            state.settings.hourlyRate = parseFloat(document.getElementById('hourlyRate')?.value) || 50;
+            localStorage.setItem('blueprintV3', JSON.stringify(state));
+        }
+
+        // ==================== NAVIGATION ====================
+        function updateUI() {
+            // Slides
+            document.querySelectorAll('.slide').forEach((s, i) => {
+                s.classList.toggle('active', i + 1 === state.currentSlide);
+            });
+
+            // Counter
+            document.getElementById('slideCounter').textContent = `${state.currentSlide} / ${state.totalSlides}`;
+
+            // Progress
+            document.getElementById('progressFill').style.width = `${(state.currentSlide / state.totalSlides) * 100}%`;
+
+            // Buttons
+            document.getElementById('prevBtn').disabled = state.currentSlide === 1;
+            document.getElementById('nextBtn').disabled = state.currentSlide === state.totalSlides;
+
+            // Update dynamic content
+            renderAutomationsList();
+            renderROITable();
+            renderDelegationTest();
+            renderICETable();
+            renderProcessMapping();
+            renderTriggers();
+            renderDataTransformation();
+            renderAIIntegration();
+            renderContextEngineering();
+            renderRecap();
+
+            saveState();
+        }
+
+        function nextSlide() {
+            if (state.currentSlide < state.totalSlides) {
+                state.currentSlide++;
+                updateUI();
+            }
+        }
+
+        function prevSlide() {
+            if (state.currentSlide > 1) {
+                state.currentSlide--;
+                updateUI();
+            }
+        }
+
+        function goToSlide(n) {
+            state.currentSlide = n;
+            updateUI();
+        }
+
+        function setupKeyboard() {
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+            });
+        }
+
+        // ==================== AUTOMATIONS ====================
+        function addAutomation() {
+            if (state.automations.length >= 10) {
+                alert('Maximum 10 automatisations');
+                return;
+            }
+
+            const name = document.getElementById('newAutomationName').value.trim();
+            const desc = document.getElementById('newAutomationDesc').value.trim();
+
+            if (!name) {
+                alert('Donne un nom a cette automatisation');
+                return;
+            }
+
+            const automation = {
+                id: Date.now(),
+                name: name,
+                description: desc,
+                category: document.getElementById('newAutomationCat').value,
+                frequency: document.getElementById('newAutomationFreq').value,
+                timePerWeek: parseFloat(document.getElementById('newAutomationTime').value) || 0,
+                isDigital: document.getElementById('newAutomationDigital').value === 'true',
+                delegation: { q1: null, q2: null, q3: null, q4: null, q5: null, score: 0 },
+                ice: { i: 5, c: 5, e: 5, score: 5 },
+                process: { trigger: '', actions: [], conditions: [], output: '' },
+                triggers: { suggestions: [], selected: '' },
+                data: { source: '', format: '', transform: '', destination: '' },
+                aiIntegration: { useCase: '', prompt: '' },
+                context: { working: '', shortTerm: '', longTerm: '', tools: [] },
+            };
+
+            state.automations.push(automation);
+
+            // Clear form
+            document.getElementById('newAutomationName').value = '';
+            document.getElementById('newAutomationDesc').value = '';
+            document.getElementById('newAutomationCat').value = '';
+            document.getElementById('newAutomationFreq').value = '';
+            document.getElementById('newAutomationTime').value = '';
+
+            updateUI();
+        }
+
+        function deleteAutomation(id) {
+            if (confirm('Supprimer cette automatisation?')) {
+                state.automations = state.automations.filter(a => a.id !== id);
+                updateUI();
+            }
+        }
+
+        function renderAutomationsList() {
+            const container = document.getElementById('automationsList');
+            if (!container) return;
+
+            if (state.automations.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>Aucune automatisation ajoutee</p></div>';
+                return;
+            }
+
+            container.innerHTML = state.automations.map((a, i) => `
+                <div class="automation-item">
+                    <div class="automation-number">${i + 1}</div>
+                    <div class="automation-info">
+                        <div class="automation-name">${a.name}</div>
+                        <div class="automation-meta">${a.category || 'Non categorise'} • ${a.timePerWeek}h/sem</div>
+                    </div>
+                    <div class="automation-actions">
+                        <button class="btn btn-ghost btn-icon" onclick="deleteAutomation(${a.id})" title="Supprimer">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== INCOME LENS ====================
+        function calculateAllROI() {
+            state.settings.hourlyRate = parseFloat(document.getElementById('hourlyRate')?.value) || 50;
+            updateUI();
+        }
+
+        function renderROITable() {
+            const tbody = document.getElementById('roiTableBody');
+            const tfoot = document.getElementById('roiTableFoot');
+            const alert = document.getElementById('roiAlert');
+            if (!tbody) return;
+
+            if (state.automations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Ajoute des automatisations en Page 3</td></tr>';
+                if (tfoot) tfoot.style.display = 'none';
+                if (alert) alert.style.display = 'none';
+                return;
+            }
+
+            const rate = state.settings.hourlyRate;
+            let totalTime = 0;
+            let totalROI = 0;
+
+            tbody.innerHTML = state.automations.map((a, i) => {
+                const roi = a.timePerWeek * rate * 52;
+                totalTime += a.timePerWeek;
+                totalROI += roi;
+                return `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${a.name}</td>
+                        <td>${a.timePerWeek}h</td>
+                        <td style="color: var(--accent-green); font-weight: 600;">${roi.toLocaleString()} €</td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (tfoot) {
+                tfoot.style.display = '';
+                document.getElementById('totalTime').textContent = totalTime + 'h';
+                document.getElementById('totalROI').textContent = totalROI.toLocaleString() + ' €';
+            }
+            if (alert) alert.style.display = '';
+        }
+
+        // ==================== DELEGATION TEST ====================
+        function renderDelegationTest() {
+            const tabs = document.getElementById('delegationTabs');
+            const content = document.getElementById('delegationContent');
+            if (!tabs || !content) return;
+
+            if (state.automations.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>Ajoute des automatisations en Page 3</p></div>';
+                return;
+            }
+
+            const activeTab = state.automations[0]?.id;
+            tabs.innerHTML = state.automations.map((a, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showDelegation(${a.id})">${i + 1}. ${a.name.substring(0, 15)}...</div>
+            `).join('');
+
+            showDelegation(activeTab);
+        }
+
+        function showDelegation(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            document.querySelectorAll('#delegationTabs .tab').forEach(t => t.classList.remove('active'));
+            event?.target?.classList.add('active');
+
+            const questions = [
+                { key: 'q1', text: 'La tache a-t-elle des etapes claires et repetables?', tip: 'Peut-on la decrire en etapes numerotees?' },
+                { key: 'q2', text: 'L\'input est-il previsible et structure?', tip: 'Les donnees d\'entree sont-elles toujours dans le meme format?' },
+                { key: 'q3', text: 'L\'output est-il defini et mesurable?', tip: 'Sait-on exactement ce qu\'on veut obtenir?' },
+                { key: 'q4', text: 'Necessite-t-elle un jugement humain complexe?', tip: 'Si OUI, l\'automatisation sera difficile' },
+                { key: 'q5', text: 'Peux-tu documenter les etapes en 5 minutes?', tip: 'Test: ecris les etapes maintenant!' },
+            ];
+
+            document.getElementById('delegationContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">${a.name}</div>
+                    <div class="card-content" style="margin-top: 0.5rem; margin-bottom: 1rem;">${a.description || 'Pas de description'}</div>
+
+                    ${questions.map(q => `
+                        <div class="checklist-item ${a.delegation[q.key] === true ? 'checked' : ''}" onclick="toggleDelegation(${id}, '${q.key}')">
+                            <input type="checkbox" ${a.delegation[q.key] === true ? 'checked' : ''}>
+                            <span>
+                                <strong>${q.text}</strong><br>
+                                <small style="color: var(--text-muted);">${q.tip}</small>
+                            </span>
+                        </div>
+                    `).join('')}
+
+                    <div class="stat-card" style="margin-top: 1rem;">
+                        <div class="stat-value">${a.delegation.score || 0}/5</div>
+                        <div class="stat-label">${a.delegation.score >= 4 ? '✅ Automatisable' : a.delegation.score >= 2 ? '⚠️ Partiellement' : '❌ Difficile'}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleDelegation(id, key) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+            a.delegation[key] = !a.delegation[key];
+            // Calculate score (q4 is inverted - NO is good)
+            a.delegation.score = [a.delegation.q1, a.delegation.q2, a.delegation.q3, !a.delegation.q4, a.delegation.q5].filter(Boolean).length;
+            saveState();
+            showDelegation(id);
+        }
+
+        // ==================== ICE SCORING ====================
+        function renderICETable() {
+            const tbody = document.getElementById('iceTableBody');
+            if (!tbody) return;
+
+            if (state.automations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Ajoute des automatisations en Page 3</td></tr>';
+                return;
+            }
+
+            // Sort by score
+            const sorted = [...state.automations].sort((a, b) => b.ice.score - a.ice.score);
+            sorted.forEach((a, i) => a.ice.rank = i + 1);
+
+            tbody.innerHTML = sorted.map(a => {
+                const rankClass = a.ice.rank === 1 ? 'rank-1' : a.ice.rank === 2 ? 'rank-2' : a.ice.rank === 3 ? 'rank-3' : '';
+                return `
+                    <tr>
+                        <td class="${rankClass}">#${a.ice.rank}</td>
+                        <td>${a.name}</td>
+                        <td><input type="number" value="${a.ice.i}" min="1" max="10" style="width:50px" onchange="updateICE(${a.id}, 'i', this.value)"></td>
+                        <td><input type="number" value="${a.ice.c}" min="1" max="10" style="width:50px" onchange="updateICE(${a.id}, 'c', this.value)"></td>
+                        <td><input type="number" value="${a.ice.e}" min="1" max="10" style="width:50px" onchange="updateICE(${a.id}, 'e', this.value)"></td>
+                        <td style="font-weight: 700; color: var(--accent);">${a.ice.score.toFixed(1)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateICE(id, key, value) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+            a.ice[key] = parseInt(value) || 5;
+            a.ice.score = (a.ice.i + a.ice.c + a.ice.e) / 3;
+            updateUI();
+        }
+
+        // ==================== AI CALLS ====================
+        async function callOpenAI(prompt) {
+            const key = state.settings.openaiKey;
+            if (!key) {
+                alert('Configure ta cle API OpenAI en Page 1 ou dans les parametres');
+                return null;
+            }
+
+            try {
+                const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${key}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4o-mini',
+                        messages: [{ role: 'user', content: prompt }],
+                        temperature: 0.7,
+                    })
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error.message);
+                return data.choices[0].message.content;
+            } catch (err) {
+                alert('Erreur API: ' + err.message);
+                return null;
+            }
+        }
+
+        async function getAISuggestionsICE() {
+            const btn = document.getElementById('btnAIice');
+            btn.innerHTML = '<span class="loading">Chargement</span>';
+            btn.disabled = true;
+
+            for (const a of state.automations) {
+                const prompt = `Tu es un expert en automatisation. Evalue cette tache avec le framework ICE (1-10):
+
+Nom: ${a.name}
+Description: ${a.description}
+Temps economise: ${a.timePerWeek}h/semaine
+Categorie: ${a.category}
+
+Reponds UNIQUEMENT en JSON valide:
+{"i": 8, "c": 7, "e": 6, "reasoning": "explication courte"}`;
+
+                const res = await callOpenAI(prompt);
+                if (res) {
+                    try {
+                        const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+                        a.ice.i = json.i;
+                        a.ice.c = json.c;
+                        a.ice.e = json.e;
+                        a.ice.score = (json.i + json.c + json.e) / 3;
+                    } catch (e) {
+                        console.error('Parse error', e);
+                    }
+                }
+            }
+
+            btn.innerHTML = '🤖 Suggestions IA pour les scores';
+            btn.disabled = false;
+            updateUI();
+        }
+
+        // ==================== PROCESS MAPPING ====================
+        function renderProcessMapping() {
+            const tabs = document.getElementById('processTabs');
+            const content = document.getElementById('processContent');
+            if (!tabs || !content) return;
+
+            if (state.automations.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔄</div><p>Ajoute des automatisations en Page 3</p></div>';
+                return;
+            }
+
+            tabs.innerHTML = state.automations.map((a, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showProcess(${a.id})">${i + 1}. ${a.name.substring(0, 12)}...</div>
+            `).join('');
+
+            showProcess(state.automations[0].id);
+        }
+
+        async function showProcess(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            document.querySelectorAll('#processTabs .tab').forEach((t, i) => {
+                t.classList.toggle('active', state.automations[i]?.id === id);
+            });
+
+            const content = document.getElementById('processContent');
+
+            content.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">${a.name}</span>
+                        <button class="btn btn-ai" onclick="generateProcess(${id})">🤖 Generer avec IA</button>
+                    </div>
+
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <div class="process-step-icon trigger">⚡</div>
+                            <div class="process-step-content">
+                                <div class="process-step-label">Trigger</div>
+                                <input class="form-input" value="${a.process.trigger || ''}" placeholder="Ex: Reception d'un email..." onchange="updateProcess(${id}, 'trigger', this.value)">
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-icon action">🔧</div>
+                            <div class="process-step-content">
+                                <div class="process-step-label">Actions</div>
+                                <textarea class="form-input" placeholder="Liste les actions (une par ligne)..." onchange="updateProcess(${id}, 'actions', this.value)">${(a.process.actions || []).join('\n')}</textarea>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-icon condition">🔀</div>
+                            <div class="process-step-content">
+                                <div class="process-step-label">Conditions</div>
+                                <textarea class="form-input" placeholder="Si X alors Y..." onchange="updateProcess(${id}, 'conditions', this.value)">${(a.process.conditions || []).join('\n')}</textarea>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-icon output">✅</div>
+                            <div class="process-step-content">
+                                <div class="process-step-label">Output</div>
+                                <input class="form-input" value="${a.process.output || ''}" placeholder="Ex: Email envoye, data stockee..." onchange="updateProcess(${id}, 'output', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateProcess(id, key, value) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+            if (key === 'actions' || key === 'conditions') {
+                a.process[key] = value.split('\n').filter(x => x.trim());
+            } else {
+                a.process[key] = value;
+            }
+            saveState();
+        }
+
+        async function generateProcess(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            const prompt = `Tu es un expert en automatisation de processus.
+
+Tache a automatiser: ${a.name}
+Description: ${a.description}
+Categorie: ${a.category}
+
+Genere un process mapping avec:
+1. TRIGGER: L'evenement qui demarre
+2. ACTIONS: Liste de 3-5 etapes
+3. CONDITIONS: Branchements si applicable
+4. OUTPUT: Resultat final
+
+Reponds UNIQUEMENT en JSON:
+{"trigger": "...", "actions": ["...", "..."], "conditions": ["..."], "output": "..."}`;
+
+            const res = await callOpenAI(prompt);
+            if (res) {
+                try {
+                    const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+                    a.process = json;
+                    saveState();
+                    showProcess(id);
+                } catch (e) {
+                    console.error('Parse error', e);
+                }
+            }
+        }
+
+        // ==================== TRIGGERS ====================
+        function renderTriggers() {
+            const tabs = document.getElementById('triggerTabs');
+            const content = document.getElementById('triggerContent');
+            if (!tabs || !content) return;
+
+            if (state.automations.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚡</div><p>Ajoute des automatisations en Page 3</p></div>';
+                return;
+            }
+
+            tabs.innerHTML = state.automations.map((a, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showTrigger(${a.id})">${i + 1}.</div>
+            `).join('');
+
+            showTrigger(state.automations[0].id);
+        }
+
+        async function showTrigger(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            document.querySelectorAll('#triggerTabs .tab').forEach((t, i) => {
+                t.classList.toggle('active', state.automations[i]?.id === id);
+            });
+
+            document.getElementById('triggerContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">${a.name}</span>
+                        <button class="btn btn-ai" onclick="suggestTriggers(${id})">🤖 Suggerer</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Trigger selectionne</label>
+                        <input class="form-input" value="${a.triggers.selected || a.process.trigger || ''}" placeholder="Ex: Nouveau lead dans CRM" onchange="state.automations.find(x=>x.id===${id}).triggers.selected=this.value; saveState();">
+                    </div>
+
+                    ${a.triggers.suggestions.length ? `
+                        <div class="form-label">Suggestions IA</div>
+                        ${a.triggers.suggestions.map(s => `
+                            <div class="ai-suggestion" onclick="selectTrigger(${id}, '${s.trigger.replace(/'/g, "\\'")}')">
+                                <div class="ai-suggestion-header">🤖 ${s.platform}</div>
+                                <div class="ai-suggestion-content">${s.trigger}</div>
+                            </div>
+                        `).join('')}
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function selectTrigger(id, trigger) {
+            const a = state.automations.find(x => x.id === id);
+            if (a) {
+                a.triggers.selected = trigger;
+                saveState();
+                showTrigger(id);
+            }
+        }
+
+        async function suggestTriggers(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            const prompt = `Pour cette automatisation:
+Nom: ${a.name}
+Description: ${a.description}
+Process: ${a.process.trigger} -> ${a.process.actions?.join(', ')}
+
+Suggere 3 triggers avec la plateforme (Make.com ou n8n).
+
+Reponds en JSON:
+{"suggestions": [{"trigger": "...", "platform": "make"}, ...]}`;
+
+            const res = await callOpenAI(prompt);
+            if (res) {
+                try {
+                    const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+                    a.triggers.suggestions = json.suggestions;
+                    saveState();
+                    showTrigger(id);
+                } catch (e) {
+                    console.error('Parse error', e);
+                }
+            }
+        }
+
+        // ==================== DATA TRANSFORMATION ====================
+        function renderDataTransformation() {
+            const tabs = document.getElementById('dataTabs');
+            const content = document.getElementById('dataContent');
+            if (!tabs || !content) return;
+
+            if (state.automations.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔄</div><p>Ajoute des automatisations en Page 3</p></div>';
+                return;
+            }
+
+            tabs.innerHTML = state.automations.map((a, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showData(${a.id})">${i + 1}.</div>
+            `).join('');
+
+            showData(state.automations[0].id);
+        }
+
+        function showData(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            document.querySelectorAll('#dataTabs .tab').forEach((t, i) => {
+                t.classList.toggle('active', state.automations[i]?.id === id);
+            });
+
+            document.getElementById('dataContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">${a.name}</span>
+                        <button class="btn btn-ai" onclick="suggestData(${id})">🤖 Suggerer SDIT</button>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Source</label>
+                            <input class="form-input" value="${a.data.source || ''}" placeholder="D'ou viennent les donnees?" onchange="updateData(${id}, 'source', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Format</label>
+                            <input class="form-input" value="${a.data.format || ''}" placeholder="JSON, CSV, Email..." onchange="updateData(${id}, 'format', this.value)">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Transformation</label>
+                            <input class="form-input" value="${a.data.transform || ''}" placeholder="Mapping, filtrage..." onchange="updateData(${id}, 'transform', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Destination</label>
+                            <input class="form-input" value="${a.data.destination || ''}" placeholder="CRM, Email, DB..." onchange="updateData(${id}, 'destination', this.value)">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateData(id, key, value) {
+            const a = state.automations.find(x => x.id === id);
+            if (a) {
+                a.data[key] = value;
+                saveState();
+            }
+        }
+
+        async function suggestData(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            const prompt = `Pour cette automatisation, definis le SDIT:
+Nom: ${a.name}
+Description: ${a.description}
+Trigger: ${a.triggers.selected || a.process.trigger}
+
+Reponds en JSON:
+{"source": "...", "format": "...", "transform": "...", "destination": "..."}`;
+
+            const res = await callOpenAI(prompt);
+            if (res) {
+                try {
+                    const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+                    a.data = json;
+                    saveState();
+                    showData(id);
+                } catch (e) {}
+            }
+        }
+
+        // ==================== AI INTEGRATION ====================
+        function renderAIIntegration() {
+            const tabs = document.getElementById('aiTabs');
+            const content = document.getElementById('aiContent');
+            if (!tabs || !content) return;
+
+            if (state.automations.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🤖</div><p>Ajoute des automatisations en Page 3</p></div>';
+                return;
+            }
+
+            tabs.innerHTML = state.automations.map((a, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showAI(${a.id})">${i + 1}.</div>
+            `).join('');
+
+            showAI(state.automations[0].id);
+        }
+
+        function showAI(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            document.querySelectorAll('#aiTabs .tab').forEach((t, i) => {
+                t.classList.toggle('active', state.automations[i]?.id === id);
+            });
+
+            document.getElementById('aiContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">${a.name}</span>
+                        <button class="btn btn-ai" onclick="suggestAI(${id})">🤖 Suggerer</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Use Case IA</label>
+                        <select class="form-input" onchange="updateAIIntegration(${id}, 'useCase', this.value)">
+                            <option value="">Pas d'IA necessaire</option>
+                            <option value="generation" ${a.aiIntegration.useCase === 'generation' ? 'selected' : ''}>Generation (emails, textes)</option>
+                            <option value="classification" ${a.aiIntegration.useCase === 'classification' ? 'selected' : ''}>Classification (trier, router)</option>
+                            <option value="extraction" ${a.aiIntegration.useCase === 'extraction' ? 'selected' : ''}>Extraction (parser docs)</option>
+                            <option value="summarization" ${a.aiIntegration.useCase === 'summarization' ? 'selected' : ''}>Summarization</option>
+                            <option value="decision" ${a.aiIntegration.useCase === 'decision' ? 'selected' : ''}>Decision (evaluer, choisir)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Prompt Template</label>
+                        <textarea class="form-input" style="min-height: 120px;" placeholder="Le prompt a utiliser..." onchange="updateAIIntegration(${id}, 'prompt', this.value)">${a.aiIntegration.prompt || ''}</textarea>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateAIIntegration(id, key, value) {
+            const a = state.automations.find(x => x.id === id);
+            if (a) {
+                a.aiIntegration[key] = value;
+                saveState();
+            }
+        }
+
+        async function suggestAI(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            const prompt = `Pour cette automatisation, suggere comment integrer l'IA:
+Nom: ${a.name}
+Description: ${a.description}
+Process: ${a.process.trigger} -> ${a.process.actions?.join(' -> ')} -> ${a.process.output}
+
+Reponds en JSON:
+{"useCase": "generation|classification|extraction|summarization|decision", "prompt": "template de prompt a utiliser"}`;
+
+            const res = await callOpenAI(prompt);
+            if (res) {
+                try {
+                    const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+                    a.aiIntegration = json;
+                    saveState();
+                    showAI(id);
+                } catch (e) {}
+            }
+        }
+
+        // ==================== CONTEXT ENGINEERING ====================
+        function renderContextEngineering() {
+            const tabs = document.getElementById('contextTabs');
+            const content = document.getElementById('contextContent');
+            if (!tabs || !content) return;
+
+            if (state.automations.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🧠</div><p>Ajoute des automatisations en Page 3</p></div>';
+                return;
+            }
+
+            tabs.innerHTML = state.automations.map((a, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showContext(${a.id})">${i + 1}.</div>
+            `).join('');
+
+            showContext(state.automations[0].id);
+        }
+
+        function showContext(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            document.querySelectorAll('#contextTabs .tab').forEach((t, i) => {
+                t.classList.toggle('active', state.automations[i]?.id === id);
+            });
+
+            document.getElementById('contextContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">${a.name}</span>
+                        <button class="btn btn-ai" onclick="suggestContext(${id})">🤖 Suggerer</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">🧠 Working Memory (pendant execution)</label>
+                        <textarea class="form-input" placeholder="Variables, inputs de la tache courante..." onchange="updateContext(${id}, 'working', this.value)">${a.context.working || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">💬 Short-Term Memory (conversation)</label>
+                        <textarea class="form-input" placeholder="Historique recent, contexte de session..." onchange="updateContext(${id}, 'shortTerm', this.value)">${a.context.shortTerm || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📚 Long-Term Memory (persistant)</label>
+                        <textarea class="form-input" placeholder="Vector DB, CRM, documents de reference..." onchange="updateContext(${id}, 'longTerm', this.value)">${a.context.longTerm || ''}</textarea>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateContext(id, key, value) {
+            const a = state.automations.find(x => x.id === id);
+            if (a) {
+                a.context[key] = value;
+                saveState();
+            }
+        }
+
+        async function suggestContext(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            const prompt = `Pour cette automatisation avec IA, definis la strategie de contexte:
+Nom: ${a.name}
+Use case IA: ${a.aiIntegration.useCase}
+Process: ${a.process.trigger} -> ${a.process.output}
+
+Reponds en JSON avec 3 types de memoire:
+{"working": "...", "shortTerm": "...", "longTerm": "..."}`;
+
+            const res = await callOpenAI(prompt);
+            if (res) {
+                try {
+                    const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+                    a.context = { ...a.context, ...json };
+                    saveState();
+                    showContext(id);
+                } catch (e) {}
+            }
+        }
+
+        // ==================== RECAP ====================
+        function renderRecap() {
+            if (state.automations.length === 0) return;
+
+            const totalTime = state.automations.reduce((s, a) => s + (a.timePerWeek || 0), 0);
+            const totalROI = totalTime * state.settings.hourlyRate * 52;
+
+            document.getElementById('recapCount').textContent = state.automations.length;
+            document.getElementById('recapTime').textContent = totalTime + 'h';
+            document.getElementById('recapROI').textContent = totalROI.toLocaleString() + '€';
+
+            document.getElementById('recapList').innerHTML = state.automations
+                .sort((a, b) => (b.ice?.score || 0) - (a.ice?.score || 0))
+                .map((a, i) => `
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">#${i + 1} ${a.name}</span>
+                            <span class="card-badge">ICE: ${a.ice?.score?.toFixed(1) || 'N/A'}</span>
+                        </div>
+                        <div class="card-content">
+                            <p><strong>Trigger:</strong> ${a.triggers.selected || a.process.trigger || 'Non defini'}</p>
+                            <p><strong>Output:</strong> ${a.process.output || 'Non defini'}</p>
+                            <p><strong>ROI:</strong> ${(a.timePerWeek * state.settings.hourlyRate * 52).toLocaleString()} €/an</p>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        // ==================== EXPORT ====================
+        function exportJSON() {
+            const data = {
+                project: state.settings.projectName,
+                exportedAt: new Date().toISOString(),
+                hourlyRate: state.settings.hourlyRate,
+                automations: state.automations,
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `blueprint-${state.settings.projectName || 'export'}-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ==================== SUPABASE ====================
+        async function testSupabase() {
+            const url = document.getElementById('supabaseUrl').value;
+            const key = document.getElementById('supabaseKey').value;
+
+            if (!url || !key) {
+                alert('Remplis l\'URL et la cle Supabase');
+                return;
+            }
+
+            try {
+                const { createClient } = supabase;
+                const client = createClient(url, key);
+                const { data, error } = await client.from('projects').select('count').limit(1);
+                if (error) throw error;
+                alert('✅ Connexion Supabase reussie!');
+                state.supabase = client;
+                saveState();
+            } catch (err) {
+                alert('❌ Erreur: ' + err.message);
+            }
+        }
+
+        async function saveToSupabase() {
+            if (!state.settings.supabaseUrl || !state.settings.supabaseKey) {
+                alert('Configure Supabase d\'abord en Page 1');
+                return;
+            }
+
+            try {
+                const { createClient } = supabase;
+                const client = createClient(state.settings.supabaseUrl, state.settings.supabaseKey);
+
+                const { data, error } = await client.from('projects').upsert({
+                    name: state.settings.projectName || 'Sans nom',
+                    state: JSON.stringify(state),
+                    updated_at: new Date().toISOString(),
+                }).select();
+
+                if (error) throw error;
+                alert('✅ Sauvegarde cloud reussie!');
+            } catch (err) {
+                alert('❌ Erreur: ' + err.message);
+            }
+        }
+
+        // ==================== SETTINGS MODAL ====================
+        function openSettings() {
+            document.getElementById('settingsOpenAI').value = state.settings.openaiKey || '';
+            document.getElementById('settingsSupabaseUrl').value = state.settings.supabaseUrl || '';
+            document.getElementById('settingsSupabaseKey').value = state.settings.supabaseKey || '';
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function saveSettings() {
+            state.settings.openaiKey = document.getElementById('settingsOpenAI').value;
+            state.settings.supabaseUrl = document.getElementById('settingsSupabaseUrl').value;
+            state.settings.supabaseKey = document.getElementById('settingsSupabaseKey').value;
+            saveState();
+            closeSettings();
+            // Update main form too
+            document.getElementById('openaiKey').value = state.settings.openaiKey;
+            document.getElementById('supabaseUrl').value = state.settings.supabaseUrl;
+            document.getElementById('supabaseKey').value = state.settings.supabaseKey;
+        }
+
+        // Auto-save every 30 seconds
+        setInterval(saveState, 30000);
+    </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/Automation-Mapping-Blueprint-V2.html" },
+    { "source": "/", "destination": "/Automation-Mapping-Blueprint-V3.html" },
+    { "source": "/v2", "destination": "/Automation-Mapping-Blueprint-V2.html" },
     { "source": "/v1", "destination": "/Automation-Mapping-Blueprint.html" }
   ]
 }
