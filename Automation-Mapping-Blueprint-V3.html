@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Automation Blueprint V3 - AI Powered</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase removed - using localStorage only -->
     <style>
         :root {
             --bg: #070810;
@@ -226,23 +226,8 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">☁️ Supabase (optionnel)</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Supabase URL</label>
-                                <input type="text" class="form-input" id="supabaseUrl" placeholder="https://xxx.supabase.co">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Anon Key</label>
-                                <input type="password" class="form-input" id="supabaseKey" placeholder="eyJ...">
-                            </div>
-                        </div>
-                        <button class="btn btn-secondary" onclick="testSupabase()">Tester la connexion</button>
-                    </div>
+                <div class="alert alert-success">
+                    💾 Tes donnees sont sauvegardees automatiquement dans ton navigateur (LocalStorage).
                 </div>
             </section>
 
@@ -587,7 +572,7 @@
 
                 <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2rem;">
                     <button class="btn btn-primary" onclick="exportJSON()">📥 Export JSON</button>
-                    <button class="btn btn-secondary" onclick="saveToSupabase()">☁️ Sauvegarder Cloud</button>
+                    <button class="btn btn-secondary" onclick="copyShareLink()">🔗 Copier le lien</button>
                 </div>
             </section>
         </main>
@@ -613,14 +598,15 @@
                 <div class="form-group">
                     <label class="form-label">Cle API OpenAI</label>
                     <input type="password" class="form-input" id="settingsOpenAI" placeholder="sk-...">
+                    <div class="form-hint">Stockee uniquement dans ton navigateur (LocalStorage)</div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Supabase URL</label>
-                    <input type="text" class="form-input" id="settingsSupabaseUrl" placeholder="https://xxx.supabase.co">
+                    <label class="form-label">Taux horaire (EUR)</label>
+                    <input type="number" class="form-input" id="settingsHourlyRate" value="50" min="0">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Supabase Anon Key</label>
-                    <input type="password" class="form-input" id="settingsSupabaseKey" placeholder="eyJ...">
+                    <label class="form-label">Nom du projet</label>
+                    <input type="text" class="form-input" id="settingsProjectName" placeholder="Mon projet">
                 </div>
             </div>
             <div class="modal-footer">
@@ -637,13 +623,10 @@
             totalSlides: 13,
             settings: {
                 openaiKey: '',
-                supabaseUrl: '',
-                supabaseKey: '',
                 projectName: '',
                 hourlyRate: 50,
             },
             automations: [],
-            supabase: null,
         };
 
         // ==================== INIT ====================
@@ -660,8 +643,6 @@
                 state = { ...state, ...parsed };
                 document.getElementById('openaiKey').value = state.settings.openaiKey || '';
                 document.getElementById('projectName').value = state.settings.projectName || '';
-                document.getElementById('supabaseUrl').value = state.settings.supabaseUrl || '';
-                document.getElementById('supabaseKey').value = state.settings.supabaseKey || '';
                 document.getElementById('hourlyRate').value = state.settings.hourlyRate || 50;
             }
         }
@@ -669,8 +650,6 @@
         function saveState() {
             state.settings.openaiKey = document.getElementById('openaiKey')?.value || state.settings.openaiKey;
             state.settings.projectName = document.getElementById('projectName')?.value || state.settings.projectName;
-            state.settings.supabaseUrl = document.getElementById('supabaseUrl')?.value || state.settings.supabaseUrl;
-            state.settings.supabaseKey = document.getElementById('supabaseKey')?.value || state.settings.supabaseKey;
             state.settings.hourlyRate = parseFloat(document.getElementById('hourlyRate')?.value) || 50;
             localStorage.setItem('blueprintV3', JSON.stringify(state));
         }
@@ -1525,57 +1504,20 @@ Reponds en JSON avec 3 types de memoire:
             URL.revokeObjectURL(url);
         }
 
-        // ==================== SUPABASE ====================
-        async function testSupabase() {
-            const url = document.getElementById('supabaseUrl').value;
-            const key = document.getElementById('supabaseKey').value;
-
-            if (!url || !key) {
-                alert('Remplis l\'URL et la cle Supabase');
-                return;
-            }
-
-            try {
-                const { createClient } = supabase;
-                const client = createClient(url, key);
-                const { data, error } = await client.from('projects').select('count').limit(1);
-                if (error) throw error;
-                alert('✅ Connexion Supabase reussie!');
-                state.supabase = client;
-                saveState();
-            } catch (err) {
-                alert('❌ Erreur: ' + err.message);
-            }
-        }
-
-        async function saveToSupabase() {
-            if (!state.settings.supabaseUrl || !state.settings.supabaseKey) {
-                alert('Configure Supabase d\'abord en Page 1');
-                return;
-            }
-
-            try {
-                const { createClient } = supabase;
-                const client = createClient(state.settings.supabaseUrl, state.settings.supabaseKey);
-
-                const { data, error } = await client.from('projects').upsert({
-                    name: state.settings.projectName || 'Sans nom',
-                    state: JSON.stringify(state),
-                    updated_at: new Date().toISOString(),
-                }).select();
-
-                if (error) throw error;
-                alert('✅ Sauvegarde cloud reussie!');
-            } catch (err) {
-                alert('❌ Erreur: ' + err.message);
-            }
+        // ==================== SHARE ====================
+        function copyShareLink() {
+            const data = btoa(JSON.stringify(state));
+            const url = window.location.origin + window.location.pathname + '?data=' + encodeURIComponent(data.substring(0, 2000));
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert('✅ Lien copie! Note: Les donnees sont stockees localement, pas dans l\'URL.');
+            });
         }
 
         // ==================== SETTINGS MODAL ====================
         function openSettings() {
             document.getElementById('settingsOpenAI').value = state.settings.openaiKey || '';
-            document.getElementById('settingsSupabaseUrl').value = state.settings.supabaseUrl || '';
-            document.getElementById('settingsSupabaseKey').value = state.settings.supabaseKey || '';
+            document.getElementById('settingsHourlyRate').value = state.settings.hourlyRate || 50;
+            document.getElementById('settingsProjectName').value = state.settings.projectName || '';
             document.getElementById('settingsModal').classList.add('active');
         }
 
@@ -1585,14 +1527,14 @@ Reponds en JSON avec 3 types de memoire:
 
         function saveSettings() {
             state.settings.openaiKey = document.getElementById('settingsOpenAI').value;
-            state.settings.supabaseUrl = document.getElementById('settingsSupabaseUrl').value;
-            state.settings.supabaseKey = document.getElementById('settingsSupabaseKey').value;
+            state.settings.hourlyRate = parseFloat(document.getElementById('settingsHourlyRate').value) || 50;
+            state.settings.projectName = document.getElementById('settingsProjectName').value;
             saveState();
             closeSettings();
             // Update main form too
             document.getElementById('openaiKey').value = state.settings.openaiKey;
-            document.getElementById('supabaseUrl').value = state.settings.supabaseUrl;
-            document.getElementById('supabaseKey').value = state.settings.supabaseKey;
+            document.getElementById('hourlyRate').value = state.settings.hourlyRate;
+            document.getElementById('projectName').value = state.settings.projectName;
         }
 
         // Auto-save every 30 seconds
