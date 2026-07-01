@@ -217,10 +217,10 @@
                         <div class="form-group">
                             <label class="form-label">Cle API OpenAI (pour les suggestions IA)</label>
                             <div style="display: flex; gap: 0.5rem;">
-                                <input type="password" class="form-input" id="openaiKey" placeholder="sk-..." style="flex: 1;">
+                                <input type="password" class="form-input" id="openaiKey" placeholder="sk-..." style="flex: 1;" onchange="autoSaveOpenAIKey()">
                                 <button class="btn btn-secondary" id="btnTestKey" onclick="testOpenAIKey()">Tester</button>
                             </div>
-                            <div class="form-hint" id="apiKeyStatus">Stockee localement, jamais envoyee ailleurs qu'a OpenAI</div>
+                            <div class="form-hint" id="apiKeyStatus">⚠️ Clique sur "Tester" pour valider et sauvegarder ta clé</div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nom du projet</label>
@@ -1065,12 +1065,25 @@
             btn.innerHTML = 'Tester';
         }
 
+        function autoSaveOpenAIKey() {
+            const key = document.getElementById('openaiKey').value.trim();
+            const status = document.getElementById('apiKeyStatus');
+            if (key && key.startsWith('sk-')) {
+                state.settings.openaiKey = key;
+                saveState();
+                status.innerHTML = '💾 Clé sauvegardée (non testée). Clique "Tester" pour vérifier.';
+                status.style.color = 'var(--accent-orange)';
+            }
+        }
+
         async function callOpenAI(prompt) {
             const key = state.settings.openaiKey;
             if (!key) {
-                alert('Configure ta cle API OpenAI en Page 1 ou dans les parametres');
+                alert('⚠️ Configure ta clé API OpenAI en Page 1 ou dans les paramètres');
                 return null;
             }
+
+            console.log('🔄 Appel OpenAI avec clé:', key.substring(0, 10) + '...');
 
             try {
                 const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -1085,11 +1098,36 @@
                         temperature: 0.7,
                     })
                 });
+
+                console.log('📡 Réponse status:', res.status);
+
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    const errorMsg = errorData.error?.message || `HTTP ${res.status}`;
+                    throw new Error(errorMsg);
+                }
+
                 const data = await res.json();
                 if (data.error) throw new Error(data.error.message);
+
+                console.log('✅ Réponse OpenAI reçue');
                 return data.choices[0].message.content;
             } catch (err) {
-                alert('Erreur API: ' + err.message);
+                console.error('❌ Erreur OpenAI:', err);
+
+                // Message d'erreur plus explicite
+                let errorMsg = err.message;
+                if (err.message === 'Failed to fetch') {
+                    errorMsg = 'Impossible de contacter OpenAI.\n\nVérifie:\n1. Ta connexion internet\n2. Que ta clé API est valide (bouton "Tester" en Page 1)\n3. Désactive temporairement tes bloqueurs de pubs/extensions';
+                } else if (err.message.includes('401')) {
+                    errorMsg = 'Clé API invalide ou expirée. Vérifie ta clé en Page 1.';
+                } else if (err.message.includes('429')) {
+                    errorMsg = 'Trop de requêtes. Attends quelques secondes et réessaie.';
+                } else if (err.message.includes('insufficient_quota')) {
+                    errorMsg = 'Quota OpenAI épuisé. Vérifie ton compte OpenAI.';
+                }
+
+                alert('❌ Erreur API:\n\n' + errorMsg);
                 return null;
             }
         }
