@@ -837,6 +837,16 @@
             updateUI();
         }
 
+        function updateTimePerWeek(id, value) {
+            const a = state.automations.find(x => x.id === id);
+            if (a) {
+                a.timePerWeek = parseFloat(value) || 0;
+                saveState();
+                // Re-render to update ROI and totals
+                renderROITable();
+            }
+        }
+
         function renderROITable() {
             const tbody = document.getElementById('roiTableBody');
             const tfoot = document.getElementById('roiTableFoot');
@@ -862,7 +872,11 @@
                     <tr>
                         <td>${i + 1}</td>
                         <td>${a.name}</td>
-                        <td>${a.timePerWeek}h</td>
+                        <td>
+                            <input type="number" value="${a.timePerWeek}" min="0" step="0.5"
+                                style="width: 60px; text-align: center; background: var(--bg-input); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 0.4rem;"
+                                onchange="updateTimePerWeek(${a.id}, this.value)">h
+                        </td>
                         <td style="color: var(--accent-green); font-weight: 600;">${roi.toLocaleString()} €</td>
                     </tr>
                 `;
@@ -1845,22 +1859,73 @@ Reponds UNIQUEMENT avec un JSON valide au format Excalidraw:
             const a = state.automations.find(x => x.id === id);
             if (!a) return;
 
-            const prompt = `Pour cette automatisation avec IA, definis la strategie de contexte:
-Nom: ${a.name}
-Use case IA: ${a.aiIntegration.useCase}
-Process: ${a.process.trigger} -> ${a.process.output}
+            // Show loading state
+            const btn = event?.target;
+            const originalText = btn?.innerHTML;
+            if (btn) {
+                btn.innerHTML = '⏳ Génération...';
+                btn.disabled = true;
+            }
 
-Reponds en JSON avec 3 types de memoire:
-{"working": "...", "shortTerm": "...", "longTerm": "..."}`;
+            const prompt = `Tu es un expert en Context Engineering pour les agents IA et les automatisations.
 
-            const res = await callOpenAI(prompt);
-            if (res) {
-                try {
-                    const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+AUTOMATISATION A ANALYSER:
+- Nom: ${a.name}
+- Description: ${a.description || 'Non spécifiée'}
+- Catégorie: ${a.category || 'Non spécifiée'}
+- Fréquence: ${a.frequency || 'Non spécifiée'}
+
+PROCESS:
+- Trigger: ${a.process?.trigger || 'Non défini'}
+- Actions: ${a.process?.actions?.join(' → ') || 'Non définies'}
+- Output: ${a.process?.output || 'Non défini'}
+
+INTEGRATION IA:
+- Use case: ${a.aiIntegration?.useCase || 'Non défini'}
+- Prompt template: ${a.aiIntegration?.prompt || 'Non défini'}
+
+Pour cette automatisation, tu dois définir la stratégie de CONTEXT ENGINEERING en 3 parties:
+
+1. WORKING MEMORY (Mémoire de travail):
+   - Variables et inputs nécessaires PENDANT l'exécution de la tâche
+   - État courant, données de la requête en cours
+   - Ce qui doit être en mémoire vive pour le traitement
+
+2. SHORT-TERM MEMORY (Mémoire court-terme):
+   - Historique de session/conversation récent
+   - Contexte des dernières interactions (dernières minutes/heures)
+   - Résultats des appels précédents de la même session
+
+3. LONG-TERM MEMORY (Mémoire long-terme):
+   - Données persistantes (Vector DB, CRM, bases de connaissances)
+   - Documents de référence et templates
+   - Historique client, préférences, patterns récurrents
+
+Réponds UNIQUEMENT en JSON valide avec ce format:
+{
+  "working": "Description détaillée de la working memory nécessaire (2-3 phrases)",
+  "shortTerm": "Description détaillée de la short-term memory (2-3 phrases)",
+  "longTerm": "Description détaillée de la long-term memory (2-3 phrases)"
+}`;
+
+            try {
+                const res = await callOpenAI(prompt);
+                if (res) {
+                    const cleanedRes = res.replace(/```json\n?|\n?```/g, '').trim();
+                    const json = JSON.parse(cleanedRes);
                     a.context = { ...a.context, ...json };
                     saveState();
                     showContext(id);
-                } catch (e) {}
+                }
+            } catch (e) {
+                console.error('Erreur suggestContext:', e);
+                alert('Erreur lors de la génération. Vérifie ta clé API OpenAI.');
+            } finally {
+                // Restore button state
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
             }
         }
 
