@@ -904,41 +904,70 @@
             event?.target?.classList.add('active');
 
             const questions = [
-                { key: 'q1', text: 'La tache a-t-elle des etapes claires et repetables?', tip: 'Peut-on la decrire en etapes numerotees?' },
-                { key: 'q2', text: 'L\'input est-il previsible et structure?', tip: 'Les donnees d\'entree sont-elles toujours dans le meme format?' },
-                { key: 'q3', text: 'L\'output est-il defini et mesurable?', tip: 'Sait-on exactement ce qu\'on veut obtenir?' },
-                { key: 'q4', text: 'Necessite-t-elle un jugement humain complexe?', tip: 'Si OUI, l\'automatisation sera difficile' },
-                { key: 'q5', text: 'Peux-tu documenter les etapes en 5 minutes?', tip: 'Test: ecris les etapes maintenant!' },
+                { key: 'q1', text: 'Etapes claires et repetables?', tip: 'Peut-on decrire la tache en etapes numerotees?', goodAnswer: true },
+                { key: 'q2', text: 'Input previsible et structure?', tip: 'Les donnees d\'entree sont-elles toujours dans le meme format?', goodAnswer: true },
+                { key: 'q3', text: 'Output defini et mesurable?', tip: 'Sait-on exactement ce qu\'on veut obtenir?', goodAnswer: true },
+                { key: 'q4', text: 'Necessite jugement humain complexe?', tip: 'Attention: si OUI, l\'automatisation sera difficile', goodAnswer: false },
+                { key: 'q5', text: 'Documentable en 5 minutes?', tip: 'Peux-tu ecrire les etapes rapidement?', goodAnswer: true },
             ];
 
             document.getElementById('delegationContent').innerHTML = `
                 <div class="card">
-                    <div class="card-title">${a.name}</div>
-                    <div class="card-content" style="margin-top: 0.5rem; margin-bottom: 1rem;">${a.description || 'Pas de description'}</div>
+                    <div class="card-title" style="margin-bottom: 0.5rem;">${a.name}</div>
+                    <div class="card-content" style="margin-bottom: 1.5rem; color: var(--text-muted);">${a.description || 'Pas de description'}</div>
 
-                    ${questions.map(q => `
-                        <div class="checklist-item ${a.delegation[q.key] === true ? 'checked' : ''}" onclick="toggleDelegation(${id}, '${q.key}')">
-                            <input type="checkbox" ${a.delegation[q.key] === true ? 'checked' : ''}>
-                            <span>
-                                <strong>${q.text}</strong><br>
-                                <small style="color: var(--text-muted);">${q.tip}</small>
-                            </span>
+                    ${questions.map((q, i) => {
+                        const answer = a.delegation[q.key];
+                        const isYes = answer === true;
+                        const isNo = answer === false;
+                        const isGood = (isYes && q.goodAnswer) || (isNo && !q.goodAnswer);
+                        const isBad = (isYes && !q.goodAnswer) || (isNo && q.goodAnswer);
+
+                        return `
+                        <div class="delegation-question" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-card); border: 1px solid ${isGood ? 'var(--accent-green)' : isBad ? 'var(--accent-red)' : 'var(--border)'}; border-radius: 10px; margin-bottom: 0.75rem;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; margin-bottom: 0.25rem;">${i + 1}. ${q.text}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${q.tip}</div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="setDelegation(${id}, '${q.key}', true)"
+                                    style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid ${isYes ? 'var(--accent-green)' : 'var(--border)'}; background: ${isYes ? 'var(--accent-green)' : 'transparent'}; color: ${isYes ? '#fff' : 'var(--accent-green)'}; font-size: 1.25rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;"
+                                    title="Oui">✓</button>
+                                <button onclick="setDelegation(${id}, '${q.key}', false)"
+                                    style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid ${isNo ? 'var(--accent-red)' : 'var(--border)'}; background: ${isNo ? 'var(--accent-red)' : 'transparent'}; color: ${isNo ? '#fff' : 'var(--accent-red)'}; font-size: 1.25rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;"
+                                    title="Non">✗</button>
+                            </div>
                         </div>
-                    `).join('')}
+                    `}).join('')}
 
-                    <div class="stat-card" style="margin-top: 1rem;">
-                        <div class="stat-value">${a.delegation.score || 0}/5</div>
-                        <div class="stat-label">${a.delegation.score >= 4 ? '✅ Automatisable' : a.delegation.score >= 2 ? '⚠️ Partiellement' : '❌ Difficile'}</div>
+                    <div class="stat-card" style="margin-top: 1.5rem; border: 2px solid ${a.delegation.score >= 4 ? 'var(--accent-green)' : a.delegation.score >= 2 ? 'var(--accent-orange)' : 'var(--accent-red)'};">
+                        <div class="stat-value" style="color: ${a.delegation.score >= 4 ? 'var(--accent-green)' : a.delegation.score >= 2 ? 'var(--accent-orange)' : 'var(--accent-red)'};">${a.delegation.score || 0}/5</div>
+                        <div class="stat-label">${a.delegation.score >= 4 ? '✅ Automatisable!' : a.delegation.score >= 2 ? '⚠️ Partiellement automatisable' : '❌ Difficile a automatiser'}</div>
                     </div>
                 </div>
             `;
         }
 
+        function setDelegation(id, key, value) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+            a.delegation[key] = value;
+            // Calculate score (q4 is inverted - NO is good for automation)
+            const q1Good = a.delegation.q1 === true;
+            const q2Good = a.delegation.q2 === true;
+            const q3Good = a.delegation.q3 === true;
+            const q4Good = a.delegation.q4 === false; // NO is good here
+            const q5Good = a.delegation.q5 === true;
+            a.delegation.score = [q1Good, q2Good, q3Good, q4Good, q5Good].filter(Boolean).length;
+            saveState();
+            showDelegation(id);
+        }
+
+        // Legacy function for compatibility
         function toggleDelegation(id, key) {
             const a = state.automations.find(x => x.id === id);
             if (!a) return;
             a.delegation[key] = !a.delegation[key];
-            // Calculate score (q4 is inverted - NO is good)
             a.delegation.score = [a.delegation.q1, a.delegation.q2, a.delegation.q3, !a.delegation.q4, a.delegation.q5].filter(Boolean).length;
             saveState();
             showDelegation(id);
