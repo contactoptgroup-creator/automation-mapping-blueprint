@@ -216,8 +216,11 @@
                     <div class="card-content">
                         <div class="form-group">
                             <label class="form-label">Cle API OpenAI (pour les suggestions IA)</label>
-                            <input type="password" class="form-input" id="openaiKey" placeholder="sk-...">
-                            <div class="form-hint">Stockee localement, jamais envoyee ailleurs qu'a OpenAI</div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="password" class="form-input" id="openaiKey" placeholder="sk-..." style="flex: 1;">
+                                <button class="btn btn-secondary" id="btnTestKey" onclick="testOpenAIKey()">Tester</button>
+                            </div>
+                            <div class="form-hint" id="apiKeyStatus">Stockee localement, jamais envoyee ailleurs qu'a OpenAI</div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Nom du projet</label>
@@ -938,6 +941,46 @@
         }
 
         // ==================== AI CALLS ====================
+        async function testOpenAIKey() {
+            const key = document.getElementById('openaiKey').value.trim();
+            const btn = document.getElementById('btnTestKey');
+            const status = document.getElementById('apiKeyStatus');
+
+            if (!key) {
+                status.innerHTML = '❌ Entre une cle API';
+                status.style.color = 'var(--accent-red)';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '...';
+            status.innerHTML = 'Test en cours...';
+            status.style.color = 'var(--text-muted)';
+
+            try {
+                const res = await fetch('https://api.openai.com/v1/models', {
+                    headers: { 'Authorization': `Bearer ${key}` }
+                });
+
+                if (res.ok) {
+                    status.innerHTML = '✅ Cle valide! Sauvegardee.';
+                    status.style.color = 'var(--accent-green)';
+                    state.settings.openaiKey = key;
+                    saveState();
+                } else {
+                    const err = await res.json();
+                    status.innerHTML = '❌ ' + (err.error?.message || 'Cle invalide');
+                    status.style.color = 'var(--accent-red)';
+                }
+            } catch (err) {
+                status.innerHTML = '❌ Erreur: ' + err.message;
+                status.style.color = 'var(--accent-red)';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = 'Tester';
+        }
+
         async function callOpenAI(prompt) {
             const key = state.settings.openaiKey;
             if (!key) {
