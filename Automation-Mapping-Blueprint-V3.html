@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Automation Blueprint V3 - AI Powered</title>
-    <!-- Supabase removed - using localStorage only -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg: #070810;
@@ -229,9 +229,28 @@
                     </div>
                 </div>
 
-                <div class="alert alert-success">
-                    💾 Tes donnees sont sauvegardees automatiquement dans ton navigateur (LocalStorage).
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">☁️ Supabase (sauvegarde cloud)</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label class="form-label">Supabase URL</label>
+                            <input type="text" class="form-input" id="supabaseUrl" placeholder="https://xxx.supabase.co">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Supabase Anon Key</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="password" class="form-input" id="supabaseKey" placeholder="eyJ..." style="flex: 1;">
+                                <button class="btn btn-secondary" id="btnTestSupabase" onclick="testSupabase()">Tester</button>
+                            </div>
+                            <div class="form-hint" id="supabaseStatus">Optionnel - pour sauvegarder dans le cloud</div>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="alert alert-success">
+                    💾 Sauvegarde auto en local + option cloud avec Supabase</div>
             </section>
 
             <!-- SLIDE 2: INTRO -->
@@ -511,23 +530,17 @@
                 <div class="slide-header">
                     <div class="slide-badge">Phase 2 - Etape 5</div>
                     <h1 class="slide-title">Wireframing</h1>
-                    <p class="slide-subtitle">Dessine le blueprint de tes workflows</p>
+                    <p class="slide-subtitle">Genere automatiquement le blueprint de tes workflows</p>
                 </div>
 
-                <div class="alert alert-info">
-                    📐 L'integration Excalidraw arrive bientot! En attendant, utilise les liens ci-dessous.
-                </div>
+                <div class="tabs" id="wireframeTabs"></div>
 
-                <div class="card">
-                    <div class="card-title">Outils de wireframing recommandes</div>
-                    <div class="card-content" style="margin-top: 1rem;">
-                        <p>• <a href="https://excalidraw.com" target="_blank" style="color: var(--accent);">Excalidraw</a> - Simple et gratuit</p>
-                        <p>• <a href="https://miro.com" target="_blank" style="color: var(--accent);">Miro</a> - Collaboratif</p>
-                        <p>• <a href="https://whimsical.com" target="_blank" style="color: var(--accent);">Whimsical</a> - Flowcharts clean</p>
+                <div id="wireframeContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📐</div>
+                        <p>Ajoute des automatisations en Page 3</p>
                     </div>
                 </div>
-
-                <div id="wireframeContent"></div>
             </section>
 
             <!-- SLIDE 12: CONTEXT ENGINEERING -->
@@ -575,7 +588,8 @@
 
                 <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2rem;">
                     <button class="btn btn-primary" onclick="exportJSON()">📥 Export JSON</button>
-                    <button class="btn btn-secondary" onclick="copyShareLink()">🔗 Copier le lien</button>
+                    <button class="btn btn-success" onclick="saveToSupabase()">☁️ Sauvegarder Cloud</button>
+                    <button class="btn btn-secondary" onclick="loadFromSupabase()">📂 Charger Cloud</button>
                 </div>
             </section>
         </main>
@@ -628,6 +642,8 @@
                 openaiKey: '',
                 projectName: '',
                 hourlyRate: 50,
+                supabaseUrl: '',
+                supabaseKey: '',
             },
             automations: [],
         };
@@ -647,6 +663,8 @@
                 document.getElementById('openaiKey').value = state.settings.openaiKey || '';
                 document.getElementById('projectName').value = state.settings.projectName || '';
                 document.getElementById('hourlyRate').value = state.settings.hourlyRate || 50;
+                document.getElementById('supabaseUrl').value = state.settings.supabaseUrl || '';
+                document.getElementById('supabaseKey').value = state.settings.supabaseKey || '';
             }
         }
 
@@ -654,6 +672,8 @@
             state.settings.openaiKey = document.getElementById('openaiKey')?.value || state.settings.openaiKey;
             state.settings.projectName = document.getElementById('projectName')?.value || state.settings.projectName;
             state.settings.hourlyRate = parseFloat(document.getElementById('hourlyRate')?.value) || 50;
+            state.settings.supabaseUrl = document.getElementById('supabaseUrl')?.value || state.settings.supabaseUrl;
+            state.settings.supabaseKey = document.getElementById('supabaseKey')?.value || state.settings.supabaseKey;
             localStorage.setItem('blueprintV3', JSON.stringify(state));
         }
 
@@ -683,6 +703,7 @@
             renderTriggers();
             renderDataTransformation();
             renderAIIntegration();
+            renderWireframe();
             renderContextEngineering();
             renderRecap();
 
@@ -746,6 +767,7 @@
                 data: { source: '', format: '', transform: '', destination: '' },
                 aiIntegration: { useCase: '', prompt: '' },
                 context: { working: '', shortTerm: '', longTerm: '', tools: [] },
+                wireframe: null,
             };
 
             state.automations.push(automation);
@@ -1420,6 +1442,216 @@ Reponds en JSON:
             }
         }
 
+        // ==================== WIREFRAME ====================
+        function renderWireframe() {
+            const tabs = document.getElementById('wireframeTabs');
+            const content = document.getElementById('wireframeContent');
+            if (!tabs || !content) return;
+
+            if (state.automations.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📐</div><p>Ajoute des automatisations en Page 3</p></div>';
+                return;
+            }
+
+            tabs.innerHTML = state.automations.map((a, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showWireframe(${a.id})">${i + 1}.</div>
+            `).join('');
+
+            showWireframe(state.automations[0].id);
+        }
+
+        function showWireframe(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            document.querySelectorAll('#wireframeTabs .tab').forEach((t, i) => {
+                t.classList.toggle('active', state.automations[i]?.id === id);
+            });
+
+            const hasProcess = a.process.trigger || a.process.actions?.length > 0;
+
+            document.getElementById('wireframeContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">${a.name}</span>
+                        <button class="btn btn-ai" onclick="generateExcalidraw(${id})" ${!hasProcess ? 'disabled title="Complete le Process Mapping d\'abord"' : ''}>
+                            🎨 Generer Wireframe
+                        </button>
+                    </div>
+
+                    ${!hasProcess ? `
+                        <div class="alert alert-warning">
+                            ⚠️ Complete d'abord le Process Mapping (Page 7) pour generer le wireframe automatiquement.
+                        </div>
+                    ` : `
+                        <div class="ai-suggestion" style="margin-bottom: 1rem;">
+                            <div class="ai-suggestion-header">📋 Process actuel</div>
+                            <div class="ai-suggestion-content">
+                                <strong>Trigger:</strong> ${a.process.trigger || 'Non defini'}<br>
+                                <strong>Actions:</strong> ${a.process.actions?.join(' → ') || 'Non definies'}<br>
+                                <strong>Output:</strong> ${a.process.output || 'Non defini'}
+                            </div>
+                        </div>
+                    `}
+
+                    ${a.wireframe ? `
+                        <div class="alert alert-success">
+                            ✅ Wireframe genere! <a href="#" onclick="downloadExcalidraw(${id}); return false;" style="color: var(--accent);">Telecharger .excalidraw</a>
+                            ou <a href="https://excalidraw.com" target="_blank" style="color: var(--accent);">Ouvrir Excalidraw</a>
+                        </div>
+                        <div style="background: var(--bg-input); border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                            <pre style="font-size: 0.75rem; color: var(--text-muted); overflow-x: auto; white-space: pre-wrap;">${JSON.stringify(a.wireframe, null, 2).substring(0, 500)}...</pre>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-title">🔗 Ouvrir dans Excalidraw</div>
+                    <div class="card-content" style="margin-top: 0.5rem;">
+                        <p>1. Clique "Generer Wireframe" ci-dessus</p>
+                        <p>2. Telecharge le fichier .excalidraw</p>
+                        <p>3. Va sur <a href="https://excalidraw.com" target="_blank" style="color: var(--accent);">excalidraw.com</a></p>
+                        <p>4. Menu → Open → Selectionne le fichier</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function generateExcalidraw(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a) return;
+
+            const prompt = `Tu es un expert en creation de diagrammes de workflow.
+
+Pour cette automatisation, genere un wireframe au format Excalidraw JSON.
+
+Nom: ${a.name}
+Trigger: ${a.process.trigger}
+Actions: ${a.process.actions?.join(', ')}
+Conditions: ${a.process.conditions?.join(', ')}
+Output: ${a.process.output}
+
+Genere un JSON Excalidraw simple avec:
+- Des rectangles pour chaque etape (trigger = orange, actions = bleu, output = vert)
+- Des fleches entre les etapes
+- Du texte dans chaque rectangle
+
+Reponds UNIQUEMENT avec un JSON valide au format Excalidraw:
+{
+  "type": "excalidraw",
+  "version": 2,
+  "elements": [
+    {
+      "type": "rectangle",
+      "x": 100,
+      "y": 100,
+      "width": 200,
+      "height": 60,
+      "strokeColor": "#f59e0b",
+      "backgroundColor": "#fef3c7",
+      "fillStyle": "solid",
+      "id": "trigger1"
+    },
+    {
+      "type": "text",
+      "x": 120,
+      "y": 120,
+      "text": "Trigger: ...",
+      "fontSize": 14,
+      "id": "text1"
+    }
+  ]
+}`;
+
+            const res = await callOpenAI(prompt);
+            if (res) {
+                try {
+                    const json = JSON.parse(res.replace(/```json\n?|\n?```/g, '').replace(/```\n?/g, ''));
+                    a.wireframe = json;
+                    saveState();
+                    showWireframe(id);
+                } catch (e) {
+                    // Generate a simple default wireframe
+                    a.wireframe = generateSimpleWireframe(a);
+                    saveState();
+                    showWireframe(id);
+                }
+            }
+        }
+
+        function generateSimpleWireframe(a) {
+            const elements = [];
+            let y = 50;
+            const spacing = 100;
+
+            // Trigger
+            elements.push({
+                type: "rectangle", id: "r1", x: 150, y: y, width: 250, height: 50,
+                strokeColor: "#f59e0b", backgroundColor: "#fef3c7", fillStyle: "solid",
+                strokeWidth: 2, roundness: { type: 3 }
+            });
+            elements.push({
+                type: "text", id: "t1", x: 160, y: y + 15, width: 230, height: 20,
+                text: `⚡ ${a.process.trigger || 'Trigger'}`, fontSize: 14, textAlign: "center"
+            });
+
+            // Actions
+            (a.process.actions || []).forEach((action, i) => {
+                y += spacing;
+                elements.push({
+                    type: "arrow", id: `arrow${i}`, x: 275, y: y - spacing + 50, width: 0, height: spacing - 50,
+                    strokeColor: "#6b7280", points: [[0, 0], [0, spacing - 50]]
+                });
+                elements.push({
+                    type: "rectangle", id: `r${i+2}`, x: 150, y: y, width: 250, height: 50,
+                    strokeColor: "#3b82f6", backgroundColor: "#dbeafe", fillStyle: "solid",
+                    strokeWidth: 2, roundness: { type: 3 }
+                });
+                elements.push({
+                    type: "text", id: `t${i+2}`, x: 160, y: y + 15, width: 230, height: 20,
+                    text: `🔧 ${action}`, fontSize: 14, textAlign: "center"
+                });
+            });
+
+            // Output
+            y += spacing;
+            elements.push({
+                type: "arrow", id: "arrowOut", x: 275, y: y - spacing + 50, width: 0, height: spacing - 50,
+                strokeColor: "#6b7280", points: [[0, 0], [0, spacing - 50]]
+            });
+            elements.push({
+                type: "rectangle", id: "rOut", x: 150, y: y, width: 250, height: 50,
+                strokeColor: "#22c55e", backgroundColor: "#dcfce7", fillStyle: "solid",
+                strokeWidth: 2, roundness: { type: 3 }
+            });
+            elements.push({
+                type: "text", id: "tOut", x: 160, y: y + 15, width: 230, height: 20,
+                text: `✅ ${a.process.output || 'Output'}`, fontSize: 14, textAlign: "center"
+            });
+
+            return {
+                type: "excalidraw",
+                version: 2,
+                source: "Blueprint V3",
+                elements: elements,
+                appState: { viewBackgroundColor: "#ffffff" }
+            };
+        }
+
+        function downloadExcalidraw(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a || !a.wireframe) return;
+
+            const blob = new Blob([JSON.stringify(a.wireframe, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `wireframe-${a.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.excalidraw`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
         // ==================== CONTEXT ENGINEERING ====================
         function renderContextEngineering() {
             const tabs = document.getElementById('contextTabs');
@@ -1554,6 +1786,170 @@ Reponds en JSON avec 3 types de memoire:
             navigator.clipboard.writeText(window.location.href).then(() => {
                 alert('✅ Lien copie! Note: Les donnees sont stockees localement, pas dans l\'URL.');
             });
+        }
+
+        // ==================== SUPABASE ====================
+        let supabaseClient = null;
+
+        function initSupabase() {
+            const url = state.settings.supabaseUrl;
+            const key = state.settings.supabaseKey;
+            if (url && key && typeof supabase !== 'undefined') {
+                supabaseClient = supabase.createClient(url, key);
+                return true;
+            }
+            return false;
+        }
+
+        async function testSupabase() {
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+            const btn = document.getElementById('btnTestSupabase');
+            const status = document.getElementById('supabaseStatus');
+
+            if (!url || !key) {
+                status.innerHTML = '❌ Remplis l\'URL et la cle';
+                status.style.color = 'var(--accent-red)';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '...';
+            status.innerHTML = 'Test en cours...';
+            status.style.color = 'var(--text-muted)';
+
+            try {
+                const client = supabase.createClient(url, key);
+                // Test avec une simple requete
+                const { data, error } = await client.from('projects').select('id').limit(1);
+
+                if (error && error.code !== 'PGRST116') { // PGRST116 = table doesn't exist, which is OK
+                    throw new Error(error.message);
+                }
+
+                status.innerHTML = '✅ Connexion reussie! Sauvegardee.';
+                status.style.color = 'var(--accent-green)';
+                state.settings.supabaseUrl = url;
+                state.settings.supabaseKey = key;
+                supabaseClient = client;
+                saveState();
+            } catch (err) {
+                status.innerHTML = '❌ ' + (err.message || 'Erreur de connexion');
+                status.style.color = 'var(--accent-red)';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = 'Tester';
+        }
+
+        async function saveToSupabase() {
+            if (!initSupabase()) {
+                alert('Configure Supabase d\'abord (Page 1)');
+                return;
+            }
+
+            try {
+                const projectName = state.settings.projectName || 'Mon Projet';
+
+                // Check if project exists
+                const { data: existing, error: checkError } = await supabaseClient
+                    .from('projects')
+                    .select('id')
+                    .eq('name', projectName)
+                    .maybeSingle();
+
+                if (checkError) {
+                    console.error('Check error:', checkError);
+                    throw checkError;
+                }
+
+                let result;
+                if (existing) {
+                    // Update existing project
+                    result = await supabaseClient
+                        .from('projects')
+                        .update({
+                            state: state,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', existing.id)
+                        .select();
+                } else {
+                    // Insert new project
+                    result = await supabaseClient
+                        .from('projects')
+                        .insert({
+                            name: projectName,
+                            state: state
+                        })
+                        .select();
+                }
+
+                console.log('Supabase result:', result);
+
+                if (result.error) {
+                    console.error('Supabase error:', result.error);
+                    throw result.error;
+                }
+
+                alert('✅ Projet sauvegarde dans Supabase!\n\nID: ' + (result.data?.[0]?.id || 'OK'));
+            } catch (err) {
+                console.error('Save error:', err);
+                alert('❌ Erreur: ' + (err.message || JSON.stringify(err)));
+            }
+        }
+
+        async function loadFromSupabase() {
+            if (!initSupabase()) {
+                alert('Configure Supabase d\'abord (Page 1)');
+                return;
+            }
+
+            try {
+                // Get list of projects
+                const { data: projects, error } = await supabaseClient
+                    .from('projects')
+                    .select('name, updated_at')
+                    .order('updated_at', { ascending: false })
+                    .limit(10);
+
+                if (error) throw error;
+
+                if (!projects || projects.length === 0) {
+                    alert('Aucun projet trouve dans Supabase');
+                    return;
+                }
+
+                // Simple selection
+                const projectNames = projects.map((p, i) => `${i + 1}. ${p.name}`).join('\n');
+                const choice = prompt(`Choisis un projet:\n\n${projectNames}\n\nEntre le numero:`);
+
+                if (!choice) return;
+
+                const index = parseInt(choice) - 1;
+                if (isNaN(index) || index < 0 || index >= projects.length) {
+                    alert('Choix invalide');
+                    return;
+                }
+
+                // Load selected project
+                const { data: project, error: loadError } = await supabaseClient
+                    .from('projects')
+                    .select('state')
+                    .eq('name', projects[index].name)
+                    .single();
+
+                if (loadError) throw loadError;
+
+                const loadedState = JSON.parse(project.state);
+                Object.assign(state, loadedState);
+                saveState();
+                updateUI();
+
+                alert('✅ Projet charge: ' + projects[index].name);
+            } catch (err) {
+                alert('❌ Erreur: ' + err.message);
+            }
         }
 
         // ==================== SETTINGS MODAL ====================
