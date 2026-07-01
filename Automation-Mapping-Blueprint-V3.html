@@ -1675,24 +1675,34 @@ Reponds UNIQUEMENT en JSON valide:
                     `}
 
                     ${a.wireframe ? `
-                        <div class="alert alert-success">
-                            ✅ Wireframe genere! <a href="#" onclick="downloadExcalidraw(${id}); return false;" style="color: var(--accent);">Telecharger .excalidraw</a>
-                            ou <a href="https://excalidraw.com" target="_blank" style="color: var(--accent);">Ouvrir Excalidraw</a>
+                        <div class="alert alert-success" style="margin-bottom: 1rem;">
+                            ✅ Wireframe généré avec succès!
                         </div>
-                        <div style="background: var(--bg-input); border-radius: 8px; padding: 1rem; margin-top: 1rem;">
-                            <pre style="font-size: 0.75rem; color: var(--text-muted); overflow-x: auto; white-space: pre-wrap;">${JSON.stringify(a.wireframe, null, 2).substring(0, 500)}...</pre>
-                        </div>
-                    ` : ''}
-                </div>
 
-                <div class="card" style="margin-top: 1rem;">
-                    <div class="card-title">🔗 Ouvrir dans Excalidraw</div>
-                    <div class="card-content" style="margin-top: 0.5rem;">
-                        <p>1. Clique "Generer Wireframe" ci-dessus</p>
-                        <p>2. Telecharge le fichier .excalidraw</p>
-                        <p>3. Va sur <a href="https://excalidraw.com" target="_blank" style="color: var(--accent);">excalidraw.com</a></p>
-                        <p>4. Menu → Open → Selectionne le fichier</p>
-                    </div>
+                        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                            <button class="btn btn-primary" onclick="openInExcalidraw(${id})" style="flex: 1; min-width: 200px;">
+                                🚀 Ouvrir dans Excalidraw
+                            </button>
+                            <button class="btn btn-secondary" onclick="downloadExcalidraw(${id})" style="flex: 1; min-width: 150px;">
+                                📥 Télécharger .excalidraw
+                            </button>
+                            <button class="btn btn-ghost" onclick="copyWireframeToClipboard(${id})" style="min-width: 100px;">
+                                📋 Copier JSON
+                            </button>
+                        </div>
+
+                        <details style="background: var(--bg-input); border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                            <summary style="cursor: pointer; color: var(--text-dim); font-size: 0.85rem;">Voir le JSON brut</summary>
+                            <pre style="font-size: 0.75rem; color: var(--text-muted); overflow-x: auto; white-space: pre-wrap; margin-top: 0.75rem;">${JSON.stringify(a.wireframe, null, 2)}</pre>
+                        </details>
+                    ` : `
+                        <div class="card" style="margin-top: 1rem; border-style: dashed;">
+                            <div class="card-content" style="text-align: center; padding: 2rem;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📐</div>
+                                <p style="color: var(--text-muted);">Clique sur "Générer Wireframe" pour créer le blueprint visuel</p>
+                            </div>
+                        </div>
+                    `}
                 </div>
             `;
         }
@@ -1833,6 +1843,61 @@ Reponds UNIQUEMENT avec un JSON valide au format Excalidraw:
             link.download = `wireframe-${a.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.excalidraw`;
             link.click();
             URL.revokeObjectURL(url);
+        }
+
+        function openInExcalidraw(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a || !a.wireframe) {
+                alert('Génère d\'abord le wireframe!');
+                return;
+            }
+
+            // Encode the wireframe data for Excalidraw URL
+            const excalidrawData = {
+                type: "excalidraw",
+                version: 2,
+                source: "automation-blueprint",
+                elements: a.wireframe.elements || [],
+                appState: {
+                    viewBackgroundColor: "#ffffff",
+                    gridSize: null
+                },
+                files: {}
+            };
+
+            try {
+                // Convert to base64 for URL
+                const jsonString = JSON.stringify(excalidrawData);
+                const base64 = btoa(unescape(encodeURIComponent(jsonString)));
+
+                // Open Excalidraw with the data
+                const excalidrawUrl = `https://excalidraw.com/#json=${base64}`;
+                window.open(excalidrawUrl, '_blank');
+            } catch (e) {
+                console.error('Erreur ouverture Excalidraw:', e);
+                // Fallback: copy to clipboard and open Excalidraw
+                copyWireframeToClipboard(id);
+                window.open('https://excalidraw.com', '_blank');
+            }
+        }
+
+        function copyWireframeToClipboard(id) {
+            const a = state.automations.find(x => x.id === id);
+            if (!a || !a.wireframe) return;
+
+            const jsonString = JSON.stringify(a.wireframe, null, 2);
+            navigator.clipboard.writeText(jsonString).then(() => {
+                alert('✅ Wireframe copié!\n\nDans Excalidraw:\n1. Menu ☰ > Open\n2. Colle le JSON (Ctrl+V)');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = jsonString;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('✅ Wireframe copié!');
+            });
         }
 
         // ==================== CONTEXT ENGINEERING ====================
