@@ -844,6 +844,432 @@
                     <button class="btn btn-success" onclick="saveToSupabase()">☁️ Sauvegarder Cloud</button>
                     <button class="btn btn-secondary" onclick="loadFromSupabase()">📂 Charger Cloud</button>
                 </div>
+
+                <div class="alert alert-info" style="margin-top: 2rem;">
+                    ➡️ <strong>Pret pour Phase 3?</strong> Utilise ces automatisations pour creer des Opportunity Maps pour tes clients!
+                </div>
+            </section>
+
+            <!-- =============================================== -->
+            <!-- PHASE 3: FINDING OPPORTUNITIES FOR CLIENTS -->
+            <!-- =============================================== -->
+
+            <!-- SLIDE 18: INTRO PHASE 3 -->
+            <section class="slide" data-slide="18">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 3 - Introduction</div>
+                    <h1 class="slide-title">🎯 Trouver des Opportunites pour tes Clients</h1>
+                    <p class="slide-subtitle">Transforme ta methode en service payant</p>
+                </div>
+
+                <div class="alert alert-success">
+                    💰 <strong>Pourquoi les entreprises paient pour ca?</strong> Les proprietaires savent qu'ils doivent automatiser, mais ils ne savent pas PAR OU commencer.
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">📋</div>
+                        <div class="stat-label">Opportunity Map</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">📐</div>
+                        <div class="stat-label">Wireframe</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">💵</div>
+                        <div class="stat-label">$1K-$50K+</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 1rem;">🎓 Ce que tu vas apprendre</div>
+                    <div class="card-content">
+                        <p>• <strong>Time Lens Business:</strong> Identifier ou les entreprises perdent des heures de travail manuel</p>
+                        <p>• <strong>Income Lens Business:</strong> Trouver les goulots d'etranglement qui freinent leur croissance</p>
+                        <p>• <strong>SOP Audit:</strong> Evaluer quelle documentation existe (ou manque)</p>
+                        <p>• <strong>Business ICE:</strong> Prioriser avec le leadership</p>
+                        <p>• <strong>Live Blueprint:</strong> Wireframer en direct avec le client</p>
+                    </div>
+                </div>
+
+                <div class="card" style="border-color: var(--accent-gold);">
+                    <div class="card-title" style="margin-bottom: 1rem;">💎 Les Deliverables</div>
+                    <div class="card-content">
+                        <div class="form-row">
+                            <div>
+                                <strong style="color: var(--accent-gold);">Opportunity Map</strong>
+                                <p style="color: var(--text-muted);">Liste priorisee des opportunites d'automatisation</p>
+                            </div>
+                            <div>
+                                <strong style="color: var(--accent-gold);">Wireframe</strong>
+                                <p style="color: var(--text-muted);">Blueprint visuel pret a construire</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 19: CLIENT INFO -->
+            <section class="slide" data-slide="19">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 3 - Setup</div>
+                    <h1 class="slide-title">🏢 Informations Client</h1>
+                    <p class="slide-subtitle">Configure le profil de ton client</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 1rem;">📋 Profil Entreprise</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nom de l'entreprise</label>
+                            <input type="text" class="form-input" id="clientCompanyName" placeholder="Ex: ACME Corp" onchange="saveClientInfo()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Industrie</label>
+                            <select class="form-input" id="clientIndustry" onchange="saveClientInfo()">
+                                <option value="">Choisir...</option>
+                                <option value="real-estate">Immobilier / STR</option>
+                                <option value="ecommerce">E-commerce</option>
+                                <option value="saas">SaaS / Tech</option>
+                                <option value="agency">Agence</option>
+                                <option value="healthcare">Sante</option>
+                                <option value="finance">Finance / Comptabilite</option>
+                                <option value="consulting">Consulting</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Taille de l'equipe</label>
+                            <select class="form-input" id="clientTeamSize" onchange="saveClientInfo()">
+                                <option value="">Choisir...</option>
+                                <option value="solo">Solo / Freelance</option>
+                                <option value="small">1-5 employes</option>
+                                <option value="medium">6-20 employes</option>
+                                <option value="large">21-100 employes</option>
+                                <option value="enterprise">100+ employes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Taux horaire moyen (EUR)</label>
+                            <input type="number" class="form-input" id="clientHourlyRate" placeholder="50" min="0" onchange="saveClientInfo()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 1rem;">👤 Contact Principal</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nom du contact</label>
+                            <input type="text" class="form-input" id="clientContactName" placeholder="Ex: Jean Dupont" onchange="saveClientInfo()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Role</label>
+                            <select class="form-input" id="clientContactRole" onchange="saveClientInfo()">
+                                <option value="">Choisir...</option>
+                                <option value="ceo">CEO / Fondateur</option>
+                                <option value="coo">COO / Operations</option>
+                                <option value="cto">CTO / Tech</option>
+                                <option value="manager">Manager</option>
+                                <option value="employee">Employe</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 20: TIME LENS FOR BUSINESSES -->
+            <section class="slide" data-slide="20">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 3 - Etape 1</div>
+                    <h1 class="slide-title">⏱️ Time Lens Business</h1>
+                    <p class="slide-subtitle">Ou l'entreprise perd-elle du temps?</p>
+                </div>
+
+                <div class="alert alert-info">
+                    💡 <strong>Question cle:</strong> "Quelle tache votre equipe fait-elle chaque semaine qui lui fait perdre du temps?"
+                </div>
+
+                <div id="clientProcessList" class="automation-list"></div>
+
+                <div class="card" id="addClientProcessForm">
+                    <div class="card-title" style="margin-bottom: 1rem;">+ Ajouter un processus client</div>
+                    <div class="form-group">
+                        <label class="form-label">Nom du processus</label>
+                        <input type="text" class="form-input" id="newClientProcessName" placeholder="Ex: Traitement des factures fournisseurs">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-input" id="newClientProcessDesc" placeholder="Que fait l'equipe exactement?"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Departement</label>
+                            <select class="form-input" id="newClientProcessDept">
+                                <option value="">Choisir...</option>
+                                <option value="sales">Ventes</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="operations">Operations</option>
+                                <option value="finance">Finance</option>
+                                <option value="hr">RH</option>
+                                <option value="support">Support Client</option>
+                                <option value="tech">Tech / IT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Qui fait ca?</label>
+                            <input type="text" class="form-input" id="newClientProcessOwner" placeholder="Ex: Sarah (Ops Manager)">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Frequence</label>
+                            <select class="form-input" id="newClientProcessFreq">
+                                <option value="daily">Quotidien</option>
+                                <option value="weekly">Hebdomadaire</option>
+                                <option value="monthly">Mensuel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Temps/semaine (h)</label>
+                            <input type="number" class="form-input" id="newClientProcessTime" placeholder="2" min="0" step="0.5">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nb personnes impliquees</label>
+                            <input type="number" class="form-input" id="newClientProcessPeople" placeholder="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Pain Level (1-5)</label>
+                            <select class="form-input" id="newClientProcessPain">
+                                <option value="1">1 - Mineur</option>
+                                <option value="2">2 - Modere</option>
+                                <option value="3" selected>3 - Significatif</option>
+                                <option value="4">4 - Critique</option>
+                                <option value="5">5 - Urgence absolue</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addClientProcess()">Ajouter ce processus</button>
+                </div>
+            </section>
+
+            <!-- SLIDE 21: INCOME LENS FOR BUSINESSES -->
+            <section class="slide" data-slide="21">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 3 - Etape 2</div>
+                    <h1 class="slide-title">💰 Income Lens Business</h1>
+                    <p class="slide-subtitle">Goulots d'etranglement sur la croissance</p>
+                </div>
+
+                <div class="alert alert-warning">
+                    🎯 <strong>Focus:</strong> Ces processus freinent-ils les REVENUS? (pas juste le temps)
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Taux horaire equipe (EUR)</label>
+                        <input type="number" class="form-input" id="clientTeamRate" value="50" min="0" style="max-width: 150px;" oninput="calculateClientROI()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cout moyen erreur (EUR)</label>
+                        <input type="number" class="form-input" id="clientErrorCost" value="200" min="0" style="max-width: 150px;" oninput="calculateClientROI()">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Processus</th>
+                                <th>Dept</th>
+                                <th>Temps/sem</th>
+                                <th>Pain</th>
+                                <th>ROI Annuel</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientROITableBody">
+                            <tr><td colspan="6" class="empty-state">Ajoute des processus en Page 20</td></tr>
+                        </tbody>
+                        <tfoot id="clientROITableFoot" style="display: none;">
+                            <tr style="background: var(--bg-input);">
+                                <td colspan="3"><strong>TOTAL</strong></td>
+                                <td id="clientTotalTime">0h</td>
+                                <td id="clientTotalPain">-</td>
+                                <td id="clientTotalROI" style="color: var(--accent-green); font-weight: 700;">0 €</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="card" style="margin-top: 1rem; border-color: var(--accent-gold);">
+                    <div class="card-title" style="margin-bottom: 0.5rem;">💎 Questions de Growth</div>
+                    <div class="card-content" style="font-size: 0.9rem;">
+                        <p>• "Ce processus bloque-t-il des ventes ou des leads?"</p>
+                        <p>• "Combien de clients/revenus perdez-vous a cause des delais?"</p>
+                        <p>• "Si c'etait automatise, pourriez-vous scaler sans embaucher?"</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 22: SOP AUDIT -->
+            <section class="slide" data-slide="22">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 3 - Etape 3</div>
+                    <h1 class="slide-title">📋 SOP Audit</h1>
+                    <p class="slide-subtitle">Inventaire vs Creation - Qu'est-ce qui existe?</p>
+                </div>
+
+                <div class="alert alert-warning">
+                    ⚠️ <strong>Regle d'or:</strong> Tu ne peux PAS automatiser un processus qui n'est pas defini. Demande: "Pouvez-vous me montrer la documentation de ce processus?"
+                </div>
+
+                <div class="tabs" id="sopAuditTabs"></div>
+
+                <div id="sopAuditContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>Ajoute des processus en Page 20</p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1.5rem; border-color: var(--accent);">
+                    <div class="card-title" style="margin-bottom: 0.75rem;">💡 Pitch SOP au client</div>
+                    <div class="card-content" style="font-size: 0.85rem;">
+                        <p style="font-style: italic; color: var(--text);">"Avant d'automatiser ce processus, on doit documenter exactement comment ca fonctionne - y compris les exceptions. En ce moment, [X processus] vit dans la tete de Sarah. Si Sarah part, ca part avec elle. Je peux vous aider a capturer ca."</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 23: BUSINESS ICE SCORING -->
+            <section class="slide" data-slide="23">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 3 - Etape 4</div>
+                    <h1 class="slide-title">🎯 Business ICE Scoring</h1>
+                    <p class="slide-subtitle">Aligne les priorites avec le leadership</p>
+                </div>
+
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="form-row">
+                        <div><strong>I</strong> = Impact business (revenue, clients)</div>
+                        <div><strong>C</strong> = Confidence (certitude technique)</div>
+                        <div><strong>E</strong> = Ease (facilite + ressources dispo)</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-ai" onclick="getBusinessICESuggestions()" id="btnBusinessICE">
+                    🤖 Suggestions IA pour les scores
+                </button>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Processus</th>
+                                <th>ROI</th>
+                                <th>I</th>
+                                <th>C</th>
+                                <th>E</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="businessICETableBody">
+                            <tr><td colspan="7" class="empty-state">Ajoute des processus en Page 20</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-info" style="margin-top: 1rem;">
+                    💡 <strong>Tip:</strong> Presente ce tableau au client pour VALIDER les priorites avant de commencer le mapping.
+                </div>
+            </section>
+
+            <!-- SLIDE 24: LIVE BLUEPRINT MAPPING -->
+            <section class="slide" data-slide="24">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 3 - Etape 5</div>
+                    <h1 class="slide-title">📐 Live Blueprint Mapping</h1>
+                    <p class="slide-subtitle">Wireframe EN DIRECT avec le client</p>
+                </div>
+
+                <div class="alert alert-success">
+                    🎯 <strong>Objectif:</strong> Partage ton ecran, ouvre Excalidraw, et cartographie le workflow pendant que le client explique.
+                </div>
+
+                <div class="tabs" id="clientBlueprintTabs"></div>
+
+                <div id="clientBlueprintContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📐</div>
+                        <p>Ajoute des processus en Page 20 et complete le scoring ICE</p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="card-title" style="margin-bottom: 0.75rem;">⏱️ Timer de Session (Optionnel)</div>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <button class="btn btn-secondary" onclick="startBlueprintTimer()">▶️ Start 10min</button>
+                        <span id="blueprintTimer" style="font-family: monospace; font-size: 1.5rem; color: var(--accent);">10:00</span>
+                        <button class="btn btn-ghost" onclick="resetBlueprintTimer()">↺ Reset</button>
+                    </div>
+                    <div class="form-hint" style="margin-top: 0.5rem;">Explique le processus a voix haute pendant que tu dessines</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 25: OPPORTUNITY MAP EXPORT -->
+            <section class="slide" data-slide="25">
+                <div class="slide-header">
+                    <div class="slide-badge">Phase 3 - Final</div>
+                    <h1 class="slide-title">🗺️ Opportunity Map</h1>
+                    <p class="slide-subtitle">Le deliverable final pour ton client</p>
+                </div>
+
+                <div class="stats-grid" id="opportunityStats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="oppCount">0</div>
+                        <div class="stat-label">Opportunites</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="oppTime">0h</div>
+                        <div class="stat-label">Temps/semaine</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="oppROI">0€</div>
+                        <div class="stat-label">ROI Annuel</div>
+                    </div>
+                </div>
+
+                <div id="opportunityMapList"></div>
+
+                <div class="card" style="margin-top: 1.5rem; border-color: var(--accent-gold);">
+                    <div class="card-title" style="margin-bottom: 1rem;">💰 Pricing Strategy</div>
+                    <div class="card-content">
+                        <div class="form-row" style="margin-bottom: 1rem;">
+                            <div>
+                                <strong style="color: var(--accent-green);">Debutant (Pay-After)</strong>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;">$1K-$2K si le client trouve ca utile</p>
+                            </div>
+                            <div>
+                                <strong style="color: var(--accent);">Expert (Upfront)</strong>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;">$5K-$50K+ selon credibilite</p>
+                            </div>
+                        </div>
+                        <div class="alert alert-info" style="margin: 0;">
+                            💡 L'Opportunity Map n'est que le debut - chaque opportunite identifiee = un projet potentiel a vendre!
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="exportOpportunityMap()">📥 Export Opportunity Map</button>
+                    <button class="btn btn-ai" onclick="exportAllClientWireframes()">📐 Export Tous les Wireframes</button>
+                    <button class="btn btn-secondary" onclick="generateClientPDF()">📄 Generer Rapport PDF</button>
+                </div>
             </section>
         </main>
 
@@ -890,7 +1316,7 @@
         // ==================== STATE ====================
         let state = {
             currentSlide: 1,
-            totalSlides: 17,
+            totalSlides: 25,
             settings: {
                 openaiKey: '',
                 projectName: '',
@@ -904,6 +1330,19 @@
                 q1: '', q2: '', q3: '', q4: '', q5: '', q6: '', q7: ''
             },
             automations: [],
+            // Phase 3: Client Discovery
+            clientInfo: {
+                companyName: '',
+                industry: '',
+                teamSize: '',
+                hourlyRate: 50,
+                errorCost: 100,
+                contactName: '',
+                contactRole: ''
+            },
+            clientProcesses: [],
+            sopAudit: [],
+            opportunityMap: null
         };
 
         // ==================== INIT ====================
@@ -2983,6 +3422,818 @@ Réponds en JSON:
 
         // Auto-save every 30 seconds
         setInterval(saveState, 30000);
+
+        // ==================== PHASE 3: CLIENT DISCOVERY ====================
+
+        // Save client info
+        function saveClientInfo() {
+            state.clientInfo.companyName = document.getElementById('clientCompanyName')?.value || '';
+            state.clientInfo.industry = document.getElementById('clientIndustry')?.value || '';
+            state.clientInfo.teamSize = document.getElementById('clientTeamSize')?.value || '';
+            state.clientInfo.hourlyRate = parseFloat(document.getElementById('clientHourlyRate')?.value) || 50;
+            state.clientInfo.contactName = document.getElementById('clientContactName')?.value || '';
+            state.clientInfo.contactRole = document.getElementById('clientContactRole')?.value || '';
+            saveState();
+        }
+
+        function loadClientInfo() {
+            if (document.getElementById('clientCompanyName')) {
+                document.getElementById('clientCompanyName').value = state.clientInfo?.companyName || '';
+                document.getElementById('clientIndustry').value = state.clientInfo?.industry || '';
+                document.getElementById('clientTeamSize').value = state.clientInfo?.teamSize || '';
+                document.getElementById('clientHourlyRate').value = state.clientInfo?.hourlyRate || 50;
+                document.getElementById('clientContactName').value = state.clientInfo?.contactName || '';
+                document.getElementById('clientContactRole').value = state.clientInfo?.contactRole || '';
+            }
+        }
+
+        // Add client process
+        function addClientProcess() {
+            if (!state.clientProcesses) state.clientProcesses = [];
+            if (state.clientProcesses.length >= 15) {
+                alert('Maximum 15 processus par client');
+                return;
+            }
+
+            const name = document.getElementById('newClientProcessName').value.trim();
+            if (!name) {
+                alert('Donne un nom au processus');
+                return;
+            }
+
+            const process = {
+                id: Date.now(),
+                name: name,
+                description: document.getElementById('newClientProcessDesc').value.trim(),
+                department: document.getElementById('newClientProcessDept').value,
+                owner: document.getElementById('newClientProcessOwner').value.trim(),
+                frequency: document.getElementById('newClientProcessFreq').value,
+                timePerWeek: parseFloat(document.getElementById('newClientProcessTime').value) || 0,
+                peopleInvolved: parseInt(document.getElementById('newClientProcessPeople').value) || 1,
+                painLevel: parseInt(document.getElementById('newClientProcessPain').value) || 3,
+                sopAudit: {
+                    status: 'unknown',
+                    hasDoc: null,
+                    isUpToDate: null,
+                    hasEdgeCases: null,
+                    tribalKnowledge: '',
+                    gaps: []
+                },
+                ice: { i: 5, c: 5, e: 5, score: 5 },
+                blueprint: {
+                    trigger: '',
+                    actions: [],
+                    conditions: [],
+                    output: '',
+                    wireframe: null
+                }
+            };
+
+            state.clientProcesses.push(process);
+
+            // Clear form
+            document.getElementById('newClientProcessName').value = '';
+            document.getElementById('newClientProcessDesc').value = '';
+            document.getElementById('newClientProcessOwner').value = '';
+            document.getElementById('newClientProcessTime').value = '';
+            document.getElementById('newClientProcessPeople').value = '1';
+
+            saveState();
+            updateUI();
+        }
+
+        function deleteClientProcess(id) {
+            if (confirm('Supprimer ce processus?')) {
+                state.clientProcesses = state.clientProcesses.filter(p => p.id !== id);
+                saveState();
+                updateUI();
+            }
+        }
+
+        function renderClientProcessList() {
+            const container = document.getElementById('clientProcessList');
+            if (!container) return;
+
+            if (!state.clientProcesses || state.clientProcesses.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>Aucun processus ajoute</p></div>';
+                return;
+            }
+
+            container.innerHTML = state.clientProcesses.map((p, i) => `
+                <div class="automation-item">
+                    <div class="automation-number">${i + 1}</div>
+                    <div class="automation-info">
+                        <div class="automation-name">${p.name}</div>
+                        <div class="automation-meta">${p.department || 'Non categorise'} • ${p.timePerWeek}h/sem • Pain: ${p.painLevel}/5</div>
+                    </div>
+                    <div class="automation-actions">
+                        <button class="btn btn-ghost btn-icon" onclick="deleteClientProcess(${p.id})" title="Supprimer">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Income Lens for Business
+        function calculateClientROI() {
+            state.clientInfo.hourlyRate = parseFloat(document.getElementById('clientTeamRate')?.value) || 50;
+            state.clientInfo.errorCost = parseFloat(document.getElementById('clientErrorCost')?.value) || 200;
+            renderClientROITable();
+        }
+
+        function renderClientROITable() {
+            const tbody = document.getElementById('clientROITableBody');
+            const tfoot = document.getElementById('clientROITableFoot');
+            if (!tbody) return;
+
+            if (!state.clientProcesses || state.clientProcesses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Ajoute des processus en Page 20</td></tr>';
+                if (tfoot) tfoot.style.display = 'none';
+                return;
+            }
+
+            const rate = state.clientInfo?.hourlyRate || 50;
+            let totalTime = 0;
+            let totalROI = 0;
+            let totalPain = 0;
+
+            tbody.innerHTML = state.clientProcesses.map((p, i) => {
+                const effectiveTime = p.timePerWeek * (p.peopleInvolved || 1);
+                const roi = effectiveTime * rate * 52;
+                totalTime += effectiveTime;
+                totalROI += roi;
+                totalPain += p.painLevel || 0;
+                return `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${p.name}</td>
+                        <td>${p.department || '-'}</td>
+                        <td>${effectiveTime}h</td>
+                        <td style="color: ${p.painLevel >= 4 ? 'var(--accent-red)' : p.painLevel >= 3 ? 'var(--accent-orange)' : 'var(--text-dim)'};">
+                            ${'🔥'.repeat(p.painLevel)}
+                        </td>
+                        <td style="color: var(--accent-green); font-weight: 600;">${roi.toLocaleString()} €</td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (tfoot) {
+                tfoot.style.display = '';
+                document.getElementById('clientTotalTime').textContent = totalTime + 'h';
+                document.getElementById('clientTotalPain').textContent = (totalPain / state.clientProcesses.length).toFixed(1) + '/5';
+                document.getElementById('clientTotalROI').textContent = totalROI.toLocaleString() + ' €';
+            }
+        }
+
+        // SOP Audit
+        function renderSOPAudit() {
+            const tabs = document.getElementById('sopAuditTabs');
+            const content = document.getElementById('sopAuditContent');
+            if (!tabs || !content) return;
+
+            if (!state.clientProcesses || state.clientProcesses.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>Ajoute des processus en Page 20</p></div>';
+                return;
+            }
+
+            tabs.innerHTML = state.clientProcesses.map((p, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showSOPAudit(${p.id})">${i + 1}. ${p.name.substring(0, 12)}...</div>
+            `).join('');
+
+            showSOPAudit(state.clientProcesses[0].id);
+        }
+
+        function showSOPAudit(id) {
+            const p = state.clientProcesses.find(x => x.id === id);
+            if (!p) return;
+            if (!p.sopAudit) p.sopAudit = { status: 'unknown', hasDoc: null, isUpToDate: null, hasEdgeCases: null, tribalKnowledge: '', gaps: [] };
+
+            document.querySelectorAll('#sopAuditTabs .tab').forEach((t, i) => {
+                t.classList.toggle('active', state.clientProcesses[i]?.id === id);
+            });
+
+            const statusColor = p.sopAudit.status === 'complete' ? 'var(--accent-green)' :
+                               p.sopAudit.status === 'partial' ? 'var(--accent-orange)' :
+                               p.sopAudit.status === 'none' ? 'var(--accent-red)' : 'var(--text-muted)';
+
+            document.getElementById('sopAuditContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">${p.name}</span>
+                        <span style="padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.75rem; background: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor};">
+                            ${p.sopAudit.status === 'complete' ? '✅ Documenté' :
+                              p.sopAudit.status === 'partial' ? '⚠️ Partiel' :
+                              p.sopAudit.status === 'none' ? '❌ Non documenté' : '❓ A évaluer'}
+                        </span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Statut de la documentation</label>
+                        <select class="form-input" onchange="updateSOPAudit(${id}, 'status', this.value)">
+                            <option value="unknown" ${p.sopAudit.status === 'unknown' ? 'selected' : ''}>❓ A évaluer</option>
+                            <option value="complete" ${p.sopAudit.status === 'complete' ? 'selected' : ''}>✅ Documentation complète</option>
+                            <option value="partial" ${p.sopAudit.status === 'partial' ? 'selected' : ''}>⚠️ Documentation partielle/périmée</option>
+                            <option value="none" ${p.sopAudit.status === 'none' ? 'selected' : ''}>❌ Aucune documentation</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">La doc existe-t-elle?</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="updateSOPAudit(${id}, 'hasDoc', true)" style="flex:1; padding: 0.75rem; border-radius: 8px; border: 2px solid ${p.sopAudit.hasDoc === true ? 'var(--accent-green)' : 'var(--border)'}; background: ${p.sopAudit.hasDoc === true ? 'var(--accent-green)' : 'transparent'}; color: ${p.sopAudit.hasDoc === true ? '#fff' : 'var(--text)'}; cursor: pointer;">Oui</button>
+                                <button onclick="updateSOPAudit(${id}, 'hasDoc', false)" style="flex:1; padding: 0.75rem; border-radius: 8px; border: 2px solid ${p.sopAudit.hasDoc === false ? 'var(--accent-red)' : 'var(--border)'}; background: ${p.sopAudit.hasDoc === false ? 'var(--accent-red)' : 'transparent'}; color: ${p.sopAudit.hasDoc === false ? '#fff' : 'var(--text)'}; cursor: pointer;">Non</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">A jour?</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="updateSOPAudit(${id}, 'isUpToDate', true)" style="flex:1; padding: 0.75rem; border-radius: 8px; border: 2px solid ${p.sopAudit.isUpToDate === true ? 'var(--accent-green)' : 'var(--border)'}; background: ${p.sopAudit.isUpToDate === true ? 'var(--accent-green)' : 'transparent'}; color: ${p.sopAudit.isUpToDate === true ? '#fff' : 'var(--text)'}; cursor: pointer;">Oui</button>
+                                <button onclick="updateSOPAudit(${id}, 'isUpToDate', false)" style="flex:1; padding: 0.75rem; border-radius: 8px; border: 2px solid ${p.sopAudit.isUpToDate === false ? 'var(--accent-red)' : 'var(--border)'}; background: ${p.sopAudit.isUpToDate === false ? 'var(--accent-red)' : 'transparent'}; color: ${p.sopAudit.isUpToDate === false ? '#fff' : 'var(--text)'}; cursor: pointer;">Non</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">🧠 Tribal Knowledge (ce qui vit dans les têtes)</label>
+                        <textarea class="form-input" placeholder='Ex: "On CC toujours l equipe ops mais c est pas écrit", "Si > 10K€, ça va à Mike"...' onchange="updateSOPAudit(${id}, 'tribalKnowledge', this.value)">${p.sopAudit.tribalKnowledge || ''}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">🕳️ Gaps identifiés</label>
+                        <textarea class="form-input" placeholder="Règles d'escalation manquantes, edge cases non documentés..." onchange="updateSOPAudit(${id}, 'gaps', this.value.split('\\n').filter(x=>x.trim()))">${(p.sopAudit.gaps || []).join('\n')}</textarea>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateSOPAudit(id, key, value) {
+            const p = state.clientProcesses.find(x => x.id === id);
+            if (!p) return;
+            if (!p.sopAudit) p.sopAudit = {};
+            p.sopAudit[key] = value;
+            saveState();
+            showSOPAudit(id);
+        }
+
+        // Business ICE Scoring
+        function renderBusinessICE() {
+            const tbody = document.getElementById('businessICETableBody');
+            if (!tbody) return;
+
+            if (!state.clientProcesses || state.clientProcesses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Ajoute des processus en Page 20</td></tr>';
+                return;
+            }
+
+            // Sort by ICE score
+            const sorted = [...state.clientProcesses].sort((a, b) => (b.ice?.score || 0) - (a.ice?.score || 0));
+            sorted.forEach((p, i) => {
+                if (!p.ice) p.ice = { i: 5, c: 5, e: 5, score: 5 };
+                p.ice.rank = i + 1;
+            });
+
+            const rate = state.clientInfo?.hourlyRate || 50;
+
+            tbody.innerHTML = sorted.map(p => {
+                const roi = (p.timePerWeek || 0) * (p.peopleInvolved || 1) * rate * 52;
+                const rankClass = p.ice.rank === 1 ? 'rank-1' : p.ice.rank === 2 ? 'rank-2' : p.ice.rank === 3 ? 'rank-3' : '';
+                return `
+                    <tr>
+                        <td class="${rankClass}">#${p.ice.rank}</td>
+                        <td>${p.name}</td>
+                        <td style="color: var(--accent-green);">${roi.toLocaleString()}€</td>
+                        <td><input type="number" value="${p.ice.i}" min="1" max="10" style="width:50px" onchange="updateBusinessICE(${p.id}, 'i', this.value)"></td>
+                        <td><input type="number" value="${p.ice.c}" min="1" max="10" style="width:50px" onchange="updateBusinessICE(${p.id}, 'c', this.value)"></td>
+                        <td><input type="number" value="${p.ice.e}" min="1" max="10" style="width:50px" onchange="updateBusinessICE(${p.id}, 'e', this.value)"></td>
+                        <td style="font-weight: 700; color: var(--accent);">${(p.ice?.score || 5).toFixed(1)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateBusinessICE(id, key, value) {
+            const p = state.clientProcesses.find(x => x.id === id);
+            if (!p) return;
+            if (!p.ice) p.ice = { i: 5, c: 5, e: 5, score: 5 };
+            p.ice[key] = parseInt(value) || 5;
+            p.ice.score = (p.ice.i + p.ice.c + p.ice.e) / 3;
+            saveState();
+            renderBusinessICE();
+        }
+
+        async function getBusinessICESuggestions() {
+            const btn = document.getElementById('btnBusinessICE');
+            btn.innerHTML = '<span class="loading">Chargement</span>';
+            btn.disabled = true;
+
+            const rate = state.clientInfo?.hourlyRate || 50;
+
+            for (const p of state.clientProcesses) {
+                const roi = (p.timePerWeek || 0) * (p.peopleInvolved || 1) * rate * 52;
+                const prompt = `Tu es un consultant en automatisation business. Évalue ce processus client avec le framework ICE (1-10):
+
+Entreprise: ${state.clientInfo?.companyName || 'Non spécifié'}
+Industrie: ${state.clientInfo?.industry || 'Non spécifié'}
+
+Processus: ${p.name}
+Description: ${p.description || 'Non spécifié'}
+Département: ${p.department || 'Non spécifié'}
+Temps/semaine: ${p.timePerWeek}h x ${p.peopleInvolved || 1} personnes
+Pain Level: ${p.painLevel}/5
+ROI potentiel: ${roi.toLocaleString()}€/an
+Statut SOP: ${p.sopAudit?.status || 'inconnu'}
+
+IMPORTANT:
+- Impact = impact sur le BUSINESS (revenus, clients, croissance)
+- Confidence = certitude que l'automatisation FONCTIONNERA techniquement
+- Ease = facilité d'implémentation COMPTE TENU des ressources du client
+
+Réponds UNIQUEMENT en JSON valide:
+{"i": 8, "c": 7, "e": 6, "reasoning": "explication courte en français"}`;
+
+                const res = await callOpenAI(prompt);
+                if (res) {
+                    try {
+                        const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+                        p.ice = {
+                            i: json.i,
+                            c: json.c,
+                            e: json.e,
+                            score: (json.i + json.c + json.e) / 3,
+                            reasoning: json.reasoning
+                        };
+                    } catch (e) {
+                        console.error('Parse error', e);
+                    }
+                }
+            }
+
+            btn.innerHTML = '🤖 Suggestions IA pour les scores';
+            btn.disabled = false;
+            saveState();
+            renderBusinessICE();
+        }
+
+        // Client Blueprint
+        function renderClientBlueprint() {
+            const tabs = document.getElementById('clientBlueprintTabs');
+            const content = document.getElementById('clientBlueprintContent');
+            if (!tabs || !content) return;
+
+            if (!state.clientProcesses || state.clientProcesses.length === 0) {
+                tabs.innerHTML = '';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📐</div><p>Ajoute des processus en Page 20</p></div>';
+                return;
+            }
+
+            // Sort by ICE score for priority
+            const sorted = [...state.clientProcesses].sort((a, b) => (b.ice?.score || 0) - (a.ice?.score || 0));
+
+            tabs.innerHTML = sorted.map((p, i) => `
+                <div class="tab ${i === 0 ? 'active' : ''}" onclick="showClientBlueprint(${p.id})">
+                    ${p.ice?.rank === 1 ? '🥇' : p.ice?.rank === 2 ? '🥈' : p.ice?.rank === 3 ? '🥉' : ''} ${p.name.substring(0, 10)}...
+                </div>
+            `).join('');
+
+            showClientBlueprint(sorted[0].id);
+        }
+
+        async function showClientBlueprint(id) {
+            const p = state.clientProcesses.find(x => x.id === id);
+            if (!p) return;
+            if (!p.blueprint) p.blueprint = { trigger: '', actions: [], conditions: [], output: '', wireframe: null };
+
+            document.querySelectorAll('#clientBlueprintTabs .tab').forEach(t => t.classList.remove('active'));
+            event?.target?.classList.add('active');
+
+            const hasWireframe = p.blueprint.wireframe !== null;
+
+            document.getElementById('clientBlueprintContent').innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">${p.name}</span>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-ai" onclick="generateClientBlueprint(${id})">🤖 Générer</button>
+                        </div>
+                    </div>
+
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <div class="process-step-icon trigger">⚡</div>
+                            <div class="process-step-content">
+                                <div class="process-step-label">Trigger</div>
+                                <input class="form-input" value="${p.blueprint.trigger || ''}" placeholder="Qu'est-ce qui démarre ce processus?" onchange="updateClientBlueprint(${id}, 'trigger', this.value)">
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-icon action">🔧</div>
+                            <div class="process-step-content">
+                                <div class="process-step-label">Actions (une par ligne)</div>
+                                <textarea class="form-input" style="min-height: 100px;" placeholder="Étape 1...\nÉtape 2...\nÉtape 3..." onchange="updateClientBlueprint(${id}, 'actions', this.value)">${(p.blueprint.actions || []).join('\n')}</textarea>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-icon condition">🔀</div>
+                            <div class="process-step-content">
+                                <div class="process-step-label">Conditions / Branchements</div>
+                                <textarea class="form-input" placeholder="Si X alors Y...\nSi montant > 10K€ alors..." onchange="updateClientBlueprint(${id}, 'conditions', this.value)">${(p.blueprint.conditions || []).join('\n')}</textarea>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="process-step-icon output">✅</div>
+                            <div class="process-step-content">
+                                <div class="process-step-label">Output</div>
+                                <input class="form-input" value="${p.blueprint.output || ''}" placeholder="Résultat final du processus" onchange="updateClientBlueprint(${id}, 'output', this.value)">
+                            </div>
+                        </div>
+                    </div>
+
+                    ${hasWireframe ? `
+                        <div class="alert alert-success" style="margin-top: 1rem;">
+                            ✅ Wireframe prêt!
+                        </div>
+                        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem;">
+                            <button class="btn btn-primary" onclick="openClientWireframe(${id})">🚀 Ouvrir Excalidraw</button>
+                            <button class="btn btn-secondary" onclick="downloadClientWireframe(${id})">📥 Télécharger</button>
+                            <button class="btn btn-ghost" onclick="copyClientWireframe(${id})">📋 Copier JSON</button>
+                        </div>
+                    ` : `
+                        <button class="btn btn-ai" style="margin-top: 1rem; width: 100%;" onclick="generateClientWireframe(${id})">
+                            📐 Générer Wireframe Excalidraw
+                        </button>
+                    `}
+                </div>
+            `;
+        }
+
+        function updateClientBlueprint(id, key, value) {
+            const p = state.clientProcesses.find(x => x.id === id);
+            if (!p) return;
+            if (!p.blueprint) p.blueprint = {};
+            if (key === 'actions' || key === 'conditions') {
+                p.blueprint[key] = value.split('\n').filter(x => x.trim());
+            } else {
+                p.blueprint[key] = value;
+            }
+            saveState();
+        }
+
+        async function generateClientBlueprint(id) {
+            const p = state.clientProcesses.find(x => x.id === id);
+            if (!p) return;
+
+            const prompt = `Tu es un expert en automatisation de processus business.
+
+Entreprise: ${state.clientInfo?.companyName || 'Client'}
+Industrie: ${state.clientInfo?.industry || 'Non spécifié'}
+
+Processus à mapper: ${p.name}
+Description: ${p.description || 'Non spécifié'}
+Département: ${p.department || 'Non spécifié'}
+Owner actuel: ${p.owner || 'Non spécifié'}
+Tribal knowledge: ${p.sopAudit?.tribalKnowledge || 'Non documenté'}
+
+Génère un blueprint détaillé avec:
+1. TRIGGER: L'événement déclencheur
+2. ACTIONS: 4-6 étapes séquentielles
+3. CONDITIONS: Branchements et règles
+4. OUTPUT: Résultat final
+
+Réponds UNIQUEMENT en JSON:
+{"trigger": "...", "actions": ["...", "..."], "conditions": ["..."], "output": "..."}`;
+
+            const res = await callOpenAI(prompt);
+            if (res) {
+                try {
+                    const json = JSON.parse(res.replace(/```json\n?|\n?```/g, ''));
+                    p.blueprint = { ...p.blueprint, ...json };
+                    saveState();
+                    showClientBlueprint(id);
+                } catch (e) {
+                    console.error('Parse error', e);
+                }
+            }
+        }
+
+        async function generateClientWireframe(id) {
+            const p = state.clientProcesses.find(x => x.id === id);
+            if (!p || !p.blueprint) return;
+
+            // Generate wireframe
+            p.blueprint.wireframe = generateSimpleClientWireframe(p);
+            saveState();
+            showClientBlueprint(id);
+        }
+
+        function generateSimpleClientWireframe(p) {
+            const elements = [];
+            let y = 50;
+            const spacing = 100;
+
+            // Header with process name
+            elements.push({
+                type: "text", id: "header", x: 150, y: 10, width: 300, height: 30,
+                text: `📋 ${p.name}`, fontSize: 20, fontFamily: 1, textAlign: "center"
+            });
+
+            // Trigger
+            elements.push({
+                type: "rectangle", id: "r1", x: 150, y: y, width: 280, height: 50,
+                strokeColor: "#f59e0b", backgroundColor: "#fef3c7", fillStyle: "solid",
+                strokeWidth: 2, roundness: { type: 3 }
+            });
+            elements.push({
+                type: "text", id: "t1", x: 160, y: y + 12, width: 260, height: 26,
+                text: `⚡ ${p.blueprint?.trigger || 'Trigger'}`, fontSize: 14, textAlign: "center"
+            });
+
+            // Actions
+            (p.blueprint?.actions || []).forEach((action, i) => {
+                y += spacing;
+                elements.push({
+                    type: "arrow", id: `arrow${i}`, x: 290, y: y - spacing + 50, width: 0, height: spacing - 50,
+                    strokeColor: "#6b7280", points: [[0, 0], [0, spacing - 50]]
+                });
+                elements.push({
+                    type: "rectangle", id: `r${i+2}`, x: 150, y: y, width: 280, height: 50,
+                    strokeColor: "#3b82f6", backgroundColor: "#dbeafe", fillStyle: "solid",
+                    strokeWidth: 2, roundness: { type: 3 }
+                });
+                elements.push({
+                    type: "text", id: `t${i+2}`, x: 160, y: y + 12, width: 260, height: 26,
+                    text: `${i + 1}. ${action}`, fontSize: 13, textAlign: "center"
+                });
+            });
+
+            // Conditions (if any)
+            (p.blueprint?.conditions || []).forEach((cond, i) => {
+                elements.push({
+                    type: "diamond", id: `cond${i}`, x: 500, y: 100 + i * 80, width: 180, height: 60,
+                    strokeColor: "#8b5cf6", backgroundColor: "#ede9fe", fillStyle: "solid",
+                    strokeWidth: 2
+                });
+                elements.push({
+                    type: "text", id: `condt${i}`, x: 510, y: 115 + i * 80, width: 160, height: 30,
+                    text: cond.substring(0, 40), fontSize: 11, textAlign: "center"
+                });
+            });
+
+            // Output
+            y += spacing;
+            elements.push({
+                type: "arrow", id: "arrowOut", x: 290, y: y - spacing + 50, width: 0, height: spacing - 50,
+                strokeColor: "#6b7280", points: [[0, 0], [0, spacing - 50]]
+            });
+            elements.push({
+                type: "rectangle", id: "rOut", x: 150, y: y, width: 280, height: 50,
+                strokeColor: "#22c55e", backgroundColor: "#dcfce7", fillStyle: "solid",
+                strokeWidth: 2, roundness: { type: 3 }
+            });
+            elements.push({
+                type: "text", id: "tOut", x: 160, y: y + 12, width: 260, height: 26,
+                text: `✅ ${p.blueprint?.output || 'Output'}`, fontSize: 14, textAlign: "center"
+            });
+
+            return {
+                type: "excalidraw",
+                version: 2,
+                source: "Blueprint V3 - Client",
+                elements: elements,
+                appState: { viewBackgroundColor: "#ffffff" }
+            };
+        }
+
+        function openClientWireframe(id) {
+            const p = state.clientProcesses.find(x => x.id === id);
+            if (!p || !p.blueprint?.wireframe) return;
+
+            try {
+                const jsonString = JSON.stringify(p.blueprint.wireframe);
+                const base64 = btoa(unescape(encodeURIComponent(jsonString)));
+                window.open(`https://excalidraw.com/#json=${base64}`, '_blank');
+            } catch (e) {
+                copyClientWireframe(id);
+                window.open('https://excalidraw.com', '_blank');
+            }
+        }
+
+        function downloadClientWireframe(id) {
+            const p = state.clientProcesses.find(x => x.id === id);
+            if (!p || !p.blueprint?.wireframe) return;
+
+            const blob = new Blob([JSON.stringify(p.blueprint.wireframe, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `wireframe-client-${p.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.excalidraw`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function copyClientWireframe(id) {
+            const p = state.clientProcesses.find(x => x.id === id);
+            if (!p || !p.blueprint?.wireframe) return;
+
+            navigator.clipboard.writeText(JSON.stringify(p.blueprint.wireframe, null, 2)).then(() => {
+                alert('✅ Wireframe copié!');
+            });
+        }
+
+        // Timer for blueprint session
+        let blueprintTimerInterval = null;
+        let blueprintTimerSeconds = 600;
+
+        function startBlueprintTimer() {
+            if (blueprintTimerInterval) return;
+            blueprintTimerInterval = setInterval(() => {
+                blueprintTimerSeconds--;
+                const mins = Math.floor(blueprintTimerSeconds / 60);
+                const secs = blueprintTimerSeconds % 60;
+                document.getElementById('blueprintTimer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                if (blueprintTimerSeconds <= 0) {
+                    clearInterval(blueprintTimerInterval);
+                    blueprintTimerInterval = null;
+                    alert('⏰ Temps écoulé! Wrap up avec le client.');
+                }
+            }, 1000);
+        }
+
+        function resetBlueprintTimer() {
+            clearInterval(blueprintTimerInterval);
+            blueprintTimerInterval = null;
+            blueprintTimerSeconds = 600;
+            document.getElementById('blueprintTimer').textContent = '10:00';
+        }
+
+        // Opportunity Map
+        function renderOpportunityMap() {
+            const countEl = document.getElementById('oppCount');
+            const timeEl = document.getElementById('oppTime');
+            const roiEl = document.getElementById('oppROI');
+            const listEl = document.getElementById('opportunityMapList');
+
+            if (!countEl || !listEl) return;
+
+            if (!state.clientProcesses || state.clientProcesses.length === 0) {
+                countEl.textContent = '0';
+                timeEl.textContent = '0h';
+                roiEl.textContent = '0€';
+                listEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🗺️</div><p>Ajoute des processus client pour générer l\'Opportunity Map</p></div>';
+                return;
+            }
+
+            const rate = state.clientInfo?.hourlyRate || 50;
+            const sorted = [...state.clientProcesses].sort((a, b) => (b.ice?.score || 0) - (a.ice?.score || 0));
+
+            let totalTime = 0;
+            let totalROI = 0;
+
+            sorted.forEach(p => {
+                const effectiveTime = (p.timePerWeek || 0) * (p.peopleInvolved || 1);
+                totalTime += effectiveTime;
+                totalROI += effectiveTime * rate * 52;
+            });
+
+            countEl.textContent = state.clientProcesses.length;
+            timeEl.textContent = totalTime + 'h';
+            roiEl.textContent = totalROI.toLocaleString() + '€';
+
+            listEl.innerHTML = sorted.map((p, i) => {
+                const effectiveTime = (p.timePerWeek || 0) * (p.peopleInvolved || 1);
+                const roi = effectiveTime * rate * 52;
+                const rank = i + 1;
+                const medalEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+
+                return `
+                    <div class="card" style="margin-bottom: 0.75rem; ${rank <= 3 ? 'border-color: var(--accent-gold);' : ''}">
+                        <div class="card-header">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <span style="font-size: 1.5rem;">${medalEmoji}</span>
+                                <div>
+                                    <div class="card-title">${p.name}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">${p.department || 'Non catégorisé'} • ${p.owner || 'Owner non défini'}</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--accent-green); font-weight: 700;">${roi.toLocaleString()}€/an</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">ICE: ${(p.ice?.score || 5).toFixed(1)}</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-row" style="font-size: 0.85rem;">
+                                <div>⏱️ ${effectiveTime}h/sem (${p.peopleInvolved || 1} pers.)</div>
+                                <div>🔥 Pain: ${p.painLevel || 3}/5</div>
+                                <div>📋 SOP: ${p.sopAudit?.status === 'complete' ? '✅' : p.sopAudit?.status === 'partial' ? '⚠️' : '❌'}</div>
+                            </div>
+                            ${p.blueprint?.wireframe ? '<div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--accent-green);">📐 Wireframe prêt</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function exportOpportunityMap() {
+            const rate = state.clientInfo?.hourlyRate || 50;
+            const sorted = [...state.clientProcesses].sort((a, b) => (b.ice?.score || 0) - (a.ice?.score || 0));
+
+            const data = {
+                title: 'Opportunity Map',
+                client: state.clientInfo,
+                exportedAt: new Date().toISOString(),
+                opportunities: sorted.map((p, i) => ({
+                    rank: i + 1,
+                    name: p.name,
+                    department: p.department,
+                    owner: p.owner,
+                    timePerWeek: (p.timePerWeek || 0) * (p.peopleInvolved || 1),
+                    painLevel: p.painLevel,
+                    annualROI: (p.timePerWeek || 0) * (p.peopleInvolved || 1) * rate * 52,
+                    iceScore: p.ice?.score || 5,
+                    sopStatus: p.sopAudit?.status,
+                    blueprint: p.blueprint,
+                    hasWireframe: !!p.blueprint?.wireframe
+                })),
+                summary: {
+                    totalOpportunities: state.clientProcesses.length,
+                    totalTimePerWeek: sorted.reduce((s, p) => s + (p.timePerWeek || 0) * (p.peopleInvolved || 1), 0),
+                    totalAnnualROI: sorted.reduce((s, p) => s + (p.timePerWeek || 0) * (p.peopleInvolved || 1) * rate * 52, 0)
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `opportunity-map-${state.clientInfo?.companyName || 'client'}-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert('✅ Opportunity Map exporté!');
+        }
+
+        function exportAllClientWireframes() {
+            const processesWithWireframes = state.clientProcesses.filter(p => p.blueprint?.wireframe);
+
+            if (processesWithWireframes.length === 0) {
+                alert('❌ Aucun wireframe généré. Génère d\'abord les wireframes pour chaque processus.');
+                return;
+            }
+
+            // Create a combined Excalidraw file
+            let allElements = [];
+            let yOffset = 0;
+
+            processesWithWireframes.forEach((p, index) => {
+                const wireframe = p.blueprint.wireframe;
+                if (wireframe.elements) {
+                    wireframe.elements.forEach(el => {
+                        const newEl = { ...el };
+                        newEl.id = `${el.id}_${index}`;
+                        if (newEl.y !== undefined) newEl.y += yOffset;
+                        allElements.push(newEl);
+                    });
+                }
+                yOffset += 600; // Space between wireframes
+            });
+
+            const combined = {
+                type: "excalidraw",
+                version: 2,
+                source: "Blueprint V3 - All Client Wireframes",
+                elements: allElements,
+                appState: { viewBackgroundColor: "#ffffff" }
+            };
+
+            const blob = new Blob([JSON.stringify(combined, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `all-wireframes-${state.clientInfo?.companyName || 'client'}.excalidraw`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert(`✅ ${processesWithWireframes.length} wireframe(s) exporté(s)!`);
+        }
+
+        function generateClientPDF() {
+            alert('📄 Fonctionnalité PDF en développement.\n\nPour l\'instant, tu peux:\n1. Exporter l\'Opportunity Map en JSON\n2. Exporter les wireframes en Excalidraw\n3. Copier les données dans un Google Doc ou Notion');
+        }
+
+        // Update the main updateUI function to include Phase 3
+        const phase3UpdateUI = updateUI;
+        updateUI = function() {
+            phase3UpdateUI();
+
+            // Phase 3 renders
+            loadClientInfo();
+            renderClientProcessList();
+            renderClientROITable();
+            renderSOPAudit();
+            renderBusinessICE();
+            renderClientBlueprint();
+            renderOpportunityMap();
+        };
     </script>
 </body>
 </html>
