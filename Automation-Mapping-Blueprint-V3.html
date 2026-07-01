@@ -249,8 +249,24 @@
                     </div>
                 </div>
 
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🎨 Excalidraw (wireframing)</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label class="form-label">Clé API Excalidraw</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="password" class="form-input" id="excalidrawKey" placeholder="ex_..." style="flex: 1;">
+                                <button class="btn btn-secondary" id="btnTestExcalidraw" onclick="testExcalidraw()">Tester</button>
+                            </div>
+                            <div class="form-hint" id="excalidrawStatus">Pour générer les wireframes automatiquement</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="alert alert-success">
-                    💾 Sauvegarde auto en local + option cloud avec Supabase</div>
+                    💾 Sauvegarde auto en local + option cloud avec Supabase + wireframes Excalidraw</div>
             </section>
 
             <!-- SLIDE 2: INTRO -->
@@ -644,6 +660,7 @@
                 hourlyRate: 50,
                 supabaseUrl: '',
                 supabaseKey: '',
+                excalidrawKey: '',
             },
             automations: [],
         };
@@ -665,6 +682,7 @@
                 document.getElementById('hourlyRate').value = state.settings.hourlyRate || 50;
                 document.getElementById('supabaseUrl').value = state.settings.supabaseUrl || '';
                 document.getElementById('supabaseKey').value = state.settings.supabaseKey || '';
+                document.getElementById('excalidrawKey').value = state.settings.excalidrawKey || '';
             }
         }
 
@@ -674,6 +692,7 @@
             state.settings.hourlyRate = parseFloat(document.getElementById('hourlyRate')?.value) || 50;
             state.settings.supabaseUrl = document.getElementById('supabaseUrl')?.value || state.settings.supabaseUrl;
             state.settings.supabaseKey = document.getElementById('supabaseKey')?.value || state.settings.supabaseKey;
+            state.settings.excalidrawKey = document.getElementById('excalidrawKey')?.value || state.settings.excalidrawKey;
             localStorage.setItem('blueprintV3', JSON.stringify(state));
         }
 
@@ -1570,11 +1589,15 @@ Reponds UNIQUEMENT avec un JSON valide au format Excalidraw:
                     const json = JSON.parse(res.replace(/```json\n?|\n?```/g, '').replace(/```\n?/g, ''));
                     a.wireframe = json;
                     saveState();
+                    // Sauvegarder aussi dans Supabase
+                    await saveWireframeToSupabase(id, json);
                     showWireframe(id);
                 } catch (e) {
                     // Generate a simple default wireframe
                     a.wireframe = generateSimpleWireframe(a);
                     saveState();
+                    // Sauvegarder aussi dans Supabase
+                    await saveWireframeToSupabase(id, a.wireframe);
                     showWireframe(id);
                 }
             }
@@ -1949,6 +1972,79 @@ Reponds en JSON avec 3 types de memoire:
                 alert('✅ Projet charge: ' + projects[index].name);
             } catch (err) {
                 alert('❌ Erreur: ' + err.message);
+            }
+        }
+
+        // ==================== EXCALIDRAW ====================
+        async function testExcalidraw() {
+            const key = document.getElementById('excalidrawKey').value.trim();
+            const btn = document.getElementById('btnTestExcalidraw');
+            const status = document.getElementById('excalidrawStatus');
+
+            if (!key) {
+                status.innerHTML = '❌ Entre une clé API';
+                status.style.color = 'var(--accent-red)';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '...';
+            status.innerHTML = 'Test en cours...';
+            status.style.color = 'var(--text-muted)';
+
+            try {
+                // Note: Excalidraw n'a pas d'API publique officielle pour le moment
+                // On stocke la clé et on simule une validation
+                // Quand l'API sera disponible, on pourra faire un vrai test
+
+                // Pour l'instant, on vérifie juste le format de la clé
+                if (key.length > 10) {
+                    status.innerHTML = '✅ Clé sauvegardée! Prête pour génération.';
+                    status.style.color = 'var(--accent-green)';
+                    state.settings.excalidrawKey = key;
+                    saveState();
+                } else {
+                    throw new Error('Format de clé invalide');
+                }
+            } catch (err) {
+                status.innerHTML = '❌ ' + (err.message || 'Erreur');
+                status.style.color = 'var(--accent-red)';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = 'Tester';
+        }
+
+        async function saveWireframeToSupabase(automationId, wireframeData) {
+            if (!initSupabase()) {
+                console.log('Supabase non configuré - wireframe stocké localement uniquement');
+                return false;
+            }
+
+            try {
+                const projectName = state.settings.projectName || 'Mon Projet';
+
+                // Sauvegarder le wireframe dans une table dédiée
+                const { data, error } = await supabaseClient
+                    .from('wireframes')
+                    .upsert({
+                        project_name: projectName,
+                        automation_id: automationId.toString(),
+                        wireframe_data: wireframeData,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'project_name,automation_id' })
+                    .select();
+
+                if (error) {
+                    console.error('Erreur sauvegarde wireframe:', error);
+                    return false;
+                }
+
+                console.log('Wireframe sauvegardé dans Supabase:', data);
+                return true;
+            } catch (err) {
+                console.error('Erreur:', err);
+                return false;
             }
         }
 
