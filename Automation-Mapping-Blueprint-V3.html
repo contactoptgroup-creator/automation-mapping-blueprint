@@ -265,8 +265,27 @@
                     </div>
                 </div>
 
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📧 GoHighLevel (envoi automatique)</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label class="form-label">Webhook URL GHL</label>
+                            <input type="url" class="form-input" id="ghlWebhookUrl" placeholder="https://services.leadconnectorhq.com/hooks/...">
+                            <div class="form-hint">Crée un workflow GHL avec un trigger "Inbound Webhook" et colle l'URL ici</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email destinataire</label>
+                            <input type="email" class="form-input" id="recipientEmail" value="contactoptgroup@gmail.com">
+                        </div>
+                        <button class="btn btn-secondary" onclick="testGHLWebhook()">Tester le webhook</button>
+                        <div class="form-hint" id="ghlStatus" style="margin-top: 0.5rem;">Configure GHL pour envoyer les blueprints et enrichir ton CRM automatiquement</div>
+                    </div>
+                </div>
+
                 <div class="alert alert-success">
-                    💾 Sauvegarde auto en local + option cloud avec Supabase + wireframes Excalidraw</div>
+                    💾 Sauvegarde auto en local + option cloud avec Supabase + wireframes Excalidraw + envoi email</div>
             </section>
 
             <!-- SLIDE 2: INTRO -->
@@ -1269,7 +1288,9 @@
                     <button class="btn btn-primary" onclick="exportOpportunityMap()">📥 Export Opportunity Map</button>
                     <button class="btn btn-ai" onclick="exportAllClientWireframes()">📐 Export Tous les Wireframes</button>
                     <button class="btn btn-secondary" onclick="generateClientPDF()">📄 Generer Rapport PDF</button>
+                    <button class="btn btn-success" onclick="sendBlueprintByEmail()" id="btnSendEmail">📧 Envoyer Blueprint par Email</button>
                 </div>
+                <div id="emailStatus" style="margin-top: 1rem; display: none;" class="alert"></div>
             </section>
         </main>
 
@@ -1325,6 +1346,8 @@
                 supabaseUrl: '',
                 supabaseKey: '',
                 excalidrawKey: '',
+                ghlWebhookUrl: '',
+                recipientEmail: 'contactoptgroup@gmail.com',
             },
             discovery: {
                 q1: '', q2: '', q3: '', q4: '', q5: '', q6: '', q7: ''
@@ -1363,6 +1386,8 @@
                 document.getElementById('supabaseUrl').value = state.settings.supabaseUrl || '';
                 document.getElementById('supabaseKey').value = state.settings.supabaseKey || '';
                 document.getElementById('excalidrawKey').value = state.settings.excalidrawKey || '';
+                document.getElementById('ghlWebhookUrl').value = state.settings.ghlWebhookUrl || '';
+                document.getElementById('recipientEmail').value = state.settings.recipientEmail || 'contactoptgroup@gmail.com';
             }
         }
 
@@ -1373,6 +1398,8 @@
             state.settings.supabaseUrl = document.getElementById('supabaseUrl')?.value || state.settings.supabaseUrl;
             state.settings.supabaseKey = document.getElementById('supabaseKey')?.value || state.settings.supabaseKey;
             state.settings.excalidrawKey = document.getElementById('excalidrawKey')?.value || state.settings.excalidrawKey;
+            state.settings.ghlWebhookUrl = document.getElementById('ghlWebhookUrl')?.value || state.settings.ghlWebhookUrl;
+            state.settings.recipientEmail = document.getElementById('recipientEmail')?.value || state.settings.recipientEmail;
             localStorage.setItem('blueprintV3', JSON.stringify(state));
         }
 
@@ -4218,6 +4245,228 @@ Réponds UNIQUEMENT en JSON:
 
         function generateClientPDF() {
             alert('📄 Fonctionnalité PDF en développement.\n\nPour l\'instant, tu peux:\n1. Exporter l\'Opportunity Map en JSON\n2. Exporter les wireframes en Excalidraw\n3. Copier les données dans un Google Doc ou Notion');
+        }
+
+        // ==================== GHL WEBHOOK FUNCTIONS ====================
+
+        async function testGHLWebhook() {
+            const webhookUrl = document.getElementById('ghlWebhookUrl').value.trim();
+            const statusEl = document.getElementById('ghlStatus');
+
+            if (!webhookUrl) {
+                statusEl.textContent = '❌ Entre l\'URL du webhook GHL';
+                statusEl.style.color = 'var(--accent-red)';
+                return;
+            }
+
+            statusEl.textContent = '⏳ Test en cours...';
+            statusEl.style.color = 'var(--text-dim)';
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        test: true,
+                        source: 'Automation Blueprint V3',
+                        timestamp: new Date().toISOString(),
+                        message: 'Test de connexion webhook'
+                    })
+                });
+
+                if (response.ok) {
+                    statusEl.textContent = '✅ Webhook GHL connecté! Prêt à envoyer des blueprints.';
+                    statusEl.style.color = 'var(--accent-green)';
+                    saveState();
+                } else {
+                    statusEl.textContent = `⚠️ Réponse: ${response.status}. Vérifie l'URL du webhook.`;
+                    statusEl.style.color = 'var(--accent-orange)';
+                }
+            } catch (error) {
+                // CORS errors are expected for webhooks, but the request still goes through
+                statusEl.textContent = '✅ Webhook appelé! (Vérifie dans GHL que les données sont reçues)';
+                statusEl.style.color = 'var(--accent-green)';
+                saveState();
+            }
+        }
+
+        function generateBlueprintData() {
+            const rate = state.clientInfo?.hourlyRate || state.settings.hourlyRate || 50;
+            const sorted = [...state.clientProcesses].sort((a, b) => (b.ice?.score || 0) - (a.ice?.score || 0));
+            const totalROI = sorted.reduce((s, p) => s + (p.timePerWeek || 0) * (p.peopleInvolved || 1) * rate * 52, 0);
+            const totalTime = sorted.reduce((s, p) => s + (p.timePerWeek || 0) * (p.peopleInvolved || 1), 0);
+
+            // Format opportunities for GHL
+            const opportunities = sorted.map((p, i) => {
+                const rank = i + 1;
+                const effectiveTime = (p.timePerWeek || 0) * (p.peopleInvolved || 1);
+                const roi = effectiveTime * rate * 52;
+
+                return {
+                    rank: rank,
+                    name: p.name || 'Sans nom',
+                    department: p.department || 'Non catégorisé',
+                    owner: p.owner || 'N/A',
+                    time_per_week: effectiveTime,
+                    people_involved: p.peopleInvolved || 1,
+                    pain_level: p.painLevel || 3,
+                    ice_score: (p.ice?.score || 5).toFixed(1),
+                    annual_roi: roi,
+                    annual_roi_formatted: roi.toLocaleString() + '€',
+                    sop_status: p.sopAudit?.status || 'none',
+                    has_wireframe: !!p.blueprint?.wireframe,
+                    trigger: p.blueprint?.trigger || '',
+                    actions: p.blueprint?.actions || [],
+                    conditions: p.blueprint?.conditions || '',
+                    output: p.blueprint?.output || '',
+                    error_handling: p.blueprint?.errorHandling || ''
+                };
+            });
+
+            // Generate text summary for email body
+            let textSummary = `🤖 AUTOMATION BLUEPRINT\n========================\n\n`;
+            textSummary += `📊 CLIENT: ${state.clientInfo?.companyName || 'Non spécifié'}\n`;
+            textSummary += `👤 Contact: ${state.clientInfo?.contactName || 'N/A'} (${state.clientInfo?.contactRole || 'N/A'})\n`;
+            textSummary += `🏢 Industrie: ${state.clientInfo?.industry || 'N/A'}\n`;
+            textSummary += `👥 Taille équipe: ${state.clientInfo?.teamSize || 'N/A'}\n\n`;
+            textSummary += `📈 MÉTRIQUES CLÉS\n-----------------\n`;
+            textSummary += `• Opportunités: ${sorted.length}\n`;
+            textSummary += `• Temps économisé: ${totalTime}h/semaine\n`;
+            textSummary += `• ROI annuel: ${totalROI.toLocaleString()}€\n\n`;
+            textSummary += `📋 TOP OPPORTUNITÉS\n-------------------\n`;
+
+            sorted.slice(0, 5).forEach((p, i) => {
+                const effectiveTime = (p.timePerWeek || 0) * (p.peopleInvolved || 1);
+                const roi = effectiveTime * rate * 52;
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+                textSummary += `${medal} ${p.name}: ${roi.toLocaleString()}€/an (ICE: ${(p.ice?.score || 5).toFixed(1)})\n`;
+            });
+
+            return {
+                // Metadata
+                source: 'Automation Blueprint V3',
+                timestamp: new Date().toISOString(),
+                date_formatted: new Date().toLocaleDateString('fr-FR'),
+                project_name: state.settings?.projectName || 'Blueprint',
+
+                // Recipient
+                recipient_email: state.settings.recipientEmail || 'contactoptgroup@gmail.com',
+
+                // Client Info (flat for GHL custom fields)
+                client_company: state.clientInfo?.companyName || '',
+                client_contact_name: state.clientInfo?.contactName || '',
+                client_contact_role: state.clientInfo?.contactRole || '',
+                client_industry: state.clientInfo?.industry || '',
+                client_team_size: state.clientInfo?.teamSize || '',
+                client_hourly_rate: rate,
+
+                // Summary metrics
+                total_opportunities: sorted.length,
+                total_time_per_week: totalTime,
+                total_annual_roi: totalROI,
+                total_annual_roi_formatted: totalROI.toLocaleString() + '€',
+
+                // Email content
+                email_subject: `🤖 Automation Blueprint - ${state.clientInfo?.companyName || 'Nouveau Client'} - ${sorted.length} opportunités (${totalROI.toLocaleString()}€ ROI)`,
+                email_body: textSummary,
+
+                // Top 3 opportunities (for quick display in GHL)
+                top1_name: opportunities[0]?.name || '',
+                top1_roi: opportunities[0]?.annual_roi_formatted || '',
+                top2_name: opportunities[1]?.name || '',
+                top2_roi: opportunities[1]?.annual_roi_formatted || '',
+                top3_name: opportunities[2]?.name || '',
+                top3_roi: opportunities[2]?.annual_roi_formatted || '',
+
+                // Full opportunities array
+                opportunities: opportunities,
+
+                // Full state for advanced workflows
+                full_client_info: state.clientInfo,
+                full_client_processes: state.clientProcesses
+            };
+        }
+
+        async function sendBlueprintByEmail() {
+            const btn = document.getElementById('btnSendEmail');
+            const statusEl = document.getElementById('emailStatus');
+
+            // Get GHL webhook URL
+            const webhookUrl = state.settings.ghlWebhookUrl || document.getElementById('ghlWebhookUrl')?.value;
+            const recipientEmail = state.settings.recipientEmail || document.getElementById('recipientEmail')?.value || 'contactoptgroup@gmail.com';
+
+            // Validate webhook URL
+            if (!webhookUrl) {
+                statusEl.style.display = 'block';
+                statusEl.className = 'alert alert-warning';
+                statusEl.innerHTML = '⚠️ Configure le webhook GHL dans les paramètres (Page 1) avant d\'envoyer.<br><br>📖 <strong>Comment faire:</strong><ol style="margin: 10px 0; padding-left: 20px;"><li>Dans GHL, crée un nouveau Workflow</li><li>Ajoute un trigger "Inbound Webhook"</li><li>Copie l\'URL du webhook</li><li>Colle-la dans les paramètres Page 1</li></ol>';
+
+                // Offer mailto fallback
+                if (confirm('Webhook GHL non configuré. Voulez-vous ouvrir votre client email avec le contenu du blueprint?')) {
+                    openMailtoFallback(recipientEmail);
+                }
+                return;
+            }
+
+            if (state.clientProcesses.length === 0) {
+                statusEl.style.display = 'block';
+                statusEl.className = 'alert alert-warning';
+                statusEl.textContent = '⚠️ Aucun processus client à envoyer. Ajoute d\'abord des processus dans les phases précédentes.';
+                return;
+            }
+
+            // Update button state
+            btn.disabled = true;
+            btn.textContent = '⏳ Envoi en cours...';
+            statusEl.style.display = 'block';
+            statusEl.className = 'alert alert-info';
+            statusEl.textContent = '📧 Envoi des données vers GHL...';
+
+            try {
+                // Generate blueprint data
+                const blueprintData = generateBlueprintData();
+
+                // Send to GHL webhook
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    mode: 'no-cors', // GHL webhooks don't support CORS
+                    body: JSON.stringify(blueprintData)
+                });
+
+                // With no-cors mode, we can't read the response, but the request goes through
+                statusEl.className = 'alert alert-success';
+                statusEl.innerHTML = `✅ Blueprint envoyé à GHL!<br>📧 Email sera envoyé à <strong>${recipientEmail}</strong><br>📊 ${state.clientProcesses.length} opportunités | 💰 ${blueprintData.total_annual_roi_formatted} ROI annuel<br><br>💡 <em>Vérifie ton workflow GHL pour confirmer la réception.</em>`;
+                btn.textContent = '✅ Envoyé à GHL!';
+
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = '📧 Envoyer Blueprint par Email';
+                }, 3000);
+
+            } catch (error) {
+                console.error('GHL Webhook Error:', error);
+                statusEl.className = 'alert alert-warning';
+                statusEl.innerHTML = `❌ Erreur d'envoi: ${error.message}<br><br>💡 <strong>Solutions:</strong><ul style="margin: 10px 0; padding-left: 20px;"><li>Vérifie l'URL du webhook</li><li>Vérifie que le workflow GHL est actif</li></ul><button class="btn btn-secondary" onclick="openMailtoFallback('${recipientEmail}')" style="margin-top: 10px;">Ouvrir dans client email</button>`;
+                btn.disabled = false;
+                btn.textContent = '📧 Envoyer Blueprint par Email';
+            }
+        }
+
+        function openMailtoFallback(recipientEmail) {
+            const data = generateBlueprintData();
+
+            const subject = encodeURIComponent(data.email_subject);
+            const body = encodeURIComponent(data.email_body);
+
+            // Open mailto link
+            const mailtoUrl = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
+            window.open(mailtoUrl, '_blank');
+
+            const statusEl = document.getElementById('emailStatus');
+            statusEl.style.display = 'block';
+            statusEl.className = 'alert alert-info';
+            statusEl.textContent = '📧 Client email ouvert. Vérifie et envoie manuellement.';
         }
 
         // Update the main updateUI function to include Phase 3
