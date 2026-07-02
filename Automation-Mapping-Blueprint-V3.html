@@ -1284,7 +1284,23 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2rem;">
+                <!-- Auto-send email option -->
+                <div class="card" style="margin-top: 2rem; background: var(--card-bg); border: 1px solid var(--accent-green);">
+                    <div class="card-header" style="background: rgba(16, 185, 129, 0.1);">
+                        <span>📧 Envoi Automatique du Blueprint</span>
+                    </div>
+                    <div class="card-content">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="autoSendEmail" checked style="width: 20px; height: 20px; accent-color: var(--accent-green);">
+                            <span>Envoyer automatiquement le récapitulatif par email à <strong>contactoptgroup@gmail.com</strong> lors de l'export</span>
+                        </label>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;">
+                            L'email contiendra: infos client, toutes les opportunités, triggers, actions, conditions, outputs, et wireframes pour chaque automatisation.
+                        </p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
                     <button class="btn btn-primary" onclick="exportOpportunityMap()">📥 Export Opportunity Map</button>
                     <button class="btn btn-ai" onclick="exportAllClientWireframes()">📐 Export Tous les Wireframes</button>
                     <button class="btn btn-secondary" onclick="generateClientPDF()">📄 Generer Rapport PDF</button>
@@ -4160,7 +4176,7 @@ Réponds UNIQUEMENT en JSON:
             }).join('');
         }
 
-        function exportOpportunityMap() {
+        async function exportOpportunityMap() {
             const rate = state.clientInfo?.hourlyRate || 50;
             const sorted = [...state.clientProcesses].sort((a, b) => (b.ice?.score || 0) - (a.ice?.score || 0));
 
@@ -4196,7 +4212,14 @@ Réponds UNIQUEMENT en JSON:
             a.click();
             URL.revokeObjectURL(url);
 
-            alert('✅ Opportunity Map exporté!');
+            // Check if auto-send email is enabled
+            const autoSendCheckbox = document.getElementById('autoSendEmail');
+            if (autoSendCheckbox && autoSendCheckbox.checked) {
+                // Auto-send the blueprint email
+                await sendBlueprintByEmail();
+            } else {
+                alert('✅ Opportunity Map exporté!');
+            }
         }
 
         function exportAllClientWireframes() {
@@ -4324,23 +4347,77 @@ Réponds UNIQUEMENT en JSON:
             });
 
             // Generate text summary for email body
-            let textSummary = `🤖 AUTOMATION BLUEPRINT\n========================\n\n`;
+            let textSummary = `🤖 AUTOMATION BLUEPRINT - RÉCAPITULATIF COMPLET\n${'='.repeat(50)}\n\n`;
             textSummary += `📊 CLIENT: ${state.clientInfo?.companyName || 'Non spécifié'}\n`;
             textSummary += `👤 Contact: ${state.clientInfo?.contactName || 'N/A'} (${state.clientInfo?.contactRole || 'N/A'})\n`;
             textSummary += `🏢 Industrie: ${state.clientInfo?.industry || 'N/A'}\n`;
-            textSummary += `👥 Taille équipe: ${state.clientInfo?.teamSize || 'N/A'}\n\n`;
-            textSummary += `📈 MÉTRIQUES CLÉS\n-----------------\n`;
-            textSummary += `• Opportunités: ${sorted.length}\n`;
-            textSummary += `• Temps économisé: ${totalTime}h/semaine\n`;
-            textSummary += `• ROI annuel: ${totalROI.toLocaleString()}€\n\n`;
-            textSummary += `📋 TOP OPPORTUNITÉS\n-------------------\n`;
+            textSummary += `👥 Taille équipe: ${state.clientInfo?.teamSize || 'N/A'}\n`;
+            textSummary += `💰 Taux horaire: ${rate}€/h\n\n`;
+            textSummary += `📈 MÉTRIQUES CLÉS\n${'-'.repeat(30)}\n`;
+            textSummary += `• Opportunités identifiées: ${sorted.length}\n`;
+            textSummary += `• Temps économisé potentiel: ${totalTime}h/semaine\n`;
+            textSummary += `• ROI annuel estimé: ${totalROI.toLocaleString()}€\n\n`;
 
-            sorted.slice(0, 5).forEach((p, i) => {
+            textSummary += `${'='.repeat(50)}\n`;
+            textSummary += `📋 DÉTAIL DES AUTOMATISATIONS\n`;
+            textSummary += `${'='.repeat(50)}\n\n`;
+
+            sorted.forEach((p, i) => {
                 const effectiveTime = (p.timePerWeek || 0) * (p.peopleInvolved || 1);
                 const roi = effectiveTime * rate * 52;
                 const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
-                textSummary += `${medal} ${p.name}: ${roi.toLocaleString()}€/an (ICE: ${(p.ice?.score || 5).toFixed(1)})\n`;
+                const wireframeStatus = p.blueprint?.wireframe ? '✅ Wireframe créé' : '⏳ Wireframe à créer';
+
+                textSummary += `${'-'.repeat(40)}\n`;
+                textSummary += `${medal} AUTOMATISATION: ${p.name || 'Sans nom'}\n`;
+                textSummary += `${'-'.repeat(40)}\n`;
+                textSummary += `📁 Département: ${p.department || 'Non catégorisé'}\n`;
+                textSummary += `👤 Responsable: ${p.owner || 'N/A'}\n`;
+                textSummary += `⏱️ Temps/semaine: ${effectiveTime}h (${p.peopleInvolved || 1} personne(s))\n`;
+                textSummary += `😤 Niveau douleur: ${p.painLevel || 3}/5\n`;
+                textSummary += `📊 Score ICE: ${(p.ice?.score || 5).toFixed(1)}\n`;
+                textSummary += `💰 ROI annuel: ${roi.toLocaleString()}€\n`;
+                textSummary += `📄 SOP: ${p.sopAudit?.status === 'complete' ? 'Complet' : p.sopAudit?.status === 'partial' ? 'Partiel' : 'Aucun'}\n`;
+                textSummary += `🎨 ${wireframeStatus}\n\n`;
+
+                // Blueprint details
+                if (p.blueprint) {
+                    textSummary += `🔧 CONFIGURATION DE L'AUTOMATISATION:\n`;
+                    textSummary += `   ▶️ TRIGGER: ${p.blueprint.trigger || 'Non défini'}\n`;
+
+                    if (p.blueprint.actions && p.blueprint.actions.length > 0) {
+                        textSummary += `   ⚡ ACTIONS:\n`;
+                        p.blueprint.actions.forEach((action, idx) => {
+                            textSummary += `      ${idx + 1}. ${action}\n`;
+                        });
+                    } else {
+                        textSummary += `   ⚡ ACTIONS: Non définies\n`;
+                    }
+
+                    textSummary += `   🔀 CONDITIONS: ${p.blueprint.conditions || 'Aucune'}\n`;
+                    textSummary += `   📤 OUTPUT: ${p.blueprint.output || 'Non défini'}\n`;
+
+                    if (p.blueprint.errorHandling) {
+                        textSummary += `   ⚠️ GESTION ERREURS: ${p.blueprint.errorHandling}\n`;
+                    }
+                } else {
+                    textSummary += `🔧 CONFIGURATION: Blueprint non configuré\n`;
+                }
+
+                textSummary += `\n`;
             });
+
+            textSummary += `${'='.repeat(50)}\n`;
+            textSummary += `📌 PROCHAINES ÉTAPES\n`;
+            textSummary += `${'-'.repeat(30)}\n`;
+            textSummary += `1. Valider les wireframes avec le client\n`;
+            textSummary += `2. Choisir la plateforme (Make/n8n/Zapier)\n`;
+            textSummary += `3. Développer les automatisations par ordre ICE\n`;
+            textSummary += `4. Tester en environnement sandbox\n`;
+            textSummary += `5. Déployer et monitorer\n\n`;
+            textSummary += `---\n`;
+            textSummary += `Généré par Automation Blueprint V3\n`;
+            textSummary += `Date: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}\n`;
 
             return {
                 // Metadata
